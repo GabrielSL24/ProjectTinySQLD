@@ -73,6 +73,12 @@ function Send-SQLCommand {
     $client.Close()
 }
 
+# Verificar que el archivo tenga extensión .txt
+if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
+    Write-Host -ForegroundColor Red "Error: El archivo debe tener la extension .tinysql."
+    exit 1
+}
+
 if (Test-Path $QueryFile) {
     Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
     
