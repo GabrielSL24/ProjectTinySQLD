@@ -5,7 +5,7 @@ param (
     [int]$Port
 )
 
-$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse("127.0.0.1"), 11000)
+$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
 
 function Send-Message {
     param (
@@ -45,7 +45,14 @@ function Send-SQLCommand {
         [string]$command
     )
     $client = New-Object System.Net.Sockets.Socket($ipEndPoint.AddressFamily, [System.Net.Sockets.SocketType]::Stream, [System.Net.Sockets.ProtocolType]::Tcp)
-    $client.Connect($ipEndPoint)
+
+    try {
+        $client.Connect($ipEndPoint)
+    } catch {
+        Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP : $Port. Verifique que la direccion IP y el puerto sean correctos, o si el servidor esta activo."
+        exit 1
+    }
+
     $requestObject = [PSCustomObject]@{
         RequestType = 0;
         RequestBody = $command
