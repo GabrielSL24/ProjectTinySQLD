@@ -1,7 +1,0 @@
-CREATE DATABASE Universidad;
-
-CREATE TABLE Estudiante (ID INTEGER, Nombre VARCHAR(30));
-
-INSERT INTO Estudiante (1, 'Isaac');
-
-SELECT * FROM Estudiante;

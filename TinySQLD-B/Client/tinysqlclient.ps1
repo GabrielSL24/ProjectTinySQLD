@@ -2,7 +2,9 @@ param (
     [Parameter(Mandatory = $true)]
     [string]$IP,
     [Parameter(Mandatory = $true)]
-    [int]$Port
+    [int]$Port,
+    [Parameter(Mandatory = $true)]
+    [string]$QueryFile  # Archivo de instrucciones 
 )
 
 $ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
@@ -71,6 +73,17 @@ function Send-SQLCommand {
     $client.Close()
 }
 
-# This is an example, should not be called here
-Send-SQLCommand -command "CREATE TABLE ESTUDIANTE"
-Send-SQlCommand -command "SELECT * FROM ESTUDIANTE"
+if (Test-Path $QueryFile) {
+    Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
+    
+    # Leer archivo línea por línea
+    $lines = Get-Content $QueryFile
+    foreach ($line in $lines) {
+        if (-not [string]::IsNullOrWhiteSpace($line)) {
+            Send-SQLCommand -command $line
+        }
+    }
+} else {
+    Write-Host -ForegroundColor Red "Error: El archivo $QueryFile no existe. Verifique la ruta y vuelva a intentarlo."
+    exit 1
+}
