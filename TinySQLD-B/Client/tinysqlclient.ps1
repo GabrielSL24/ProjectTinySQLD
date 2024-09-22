@@ -4,7 +4,7 @@ param (
     [Parameter(Mandatory = $true)]
     [int]$Port,
     [Parameter(Mandatory = $true)]
-    [string]$QueryFile  # Archivo de instrucciones 
+    [string]$QueryFile  
 )
 
 $ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
@@ -79,10 +79,10 @@ if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
     exit 1
 }
 
+#Lee las instrucciones del archivo
 if (Test-Path $QueryFile) {
     Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
     
-    # Leer archivo línea por línea
     $lines = Get-Content $QueryFile
     foreach ($line in $lines) {
         if (-not [string]::IsNullOrWhiteSpace($line)) {
