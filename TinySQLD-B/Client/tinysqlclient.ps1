@@ -2,10 +2,12 @@ param (
     [Parameter(Mandatory = $true)]
     [string]$IP,
     [Parameter(Mandatory = $true)]
-    [int]$Port
+    [int]$Port,
+    [Parameter(Mandatory = $true)]
+    [string]$QueryFile  
 )
 
-$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse("127.0.0.1"), 11000)
+$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
 
 function Send-Message {
     param (
@@ -45,7 +47,14 @@ function Send-SQLCommand {
         [string]$command
     )
     $client = New-Object System.Net.Sockets.Socket($ipEndPoint.AddressFamily, [System.Net.Sockets.SocketType]::Stream, [System.Net.Sockets.ProtocolType]::Tcp)
-    $client.Connect($ipEndPoint)
+
+    try {
+        $client.Connect($ipEndPoint)
+    } catch {
+        Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP : $Port. Verifique que la direccion IP y el puerto sean correctos, o si el servidor esta activo."
+        exit 1
+    }
+
     $requestObject = [PSCustomObject]@{
         RequestType = 0;
         RequestBody = $command
@@ -64,6 +73,23 @@ function Send-SQLCommand {
     $client.Close()
 }
 
-# This is an example, should not be called here
-Send-SQLCommand -command "CREATE TABLE ESTUDIANTE"
-Send-SQlCommand -command "SELECT * FROM ESTUDIANTE"
+# Verificar que el archivo tenga extensión .txt
+if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
+    Write-Host -ForegroundColor Red "Error: El archivo debe tener la extension .tinysql."
+    exit 1
+}
+
+#Lee las instrucciones del archivo
+if (Test-Path $QueryFile) {
+    Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
+    
+    $lines = Get-Content $QueryFile
+    foreach ($line in $lines) {
+        if (-not [string]::IsNullOrWhiteSpace($line)) {
+            Send-SQLCommand -command $line
+        }
+    }
+} else {
+    Write-Host -ForegroundColor Red "Error: El archivo $QueryFile no existe. Verifique la ruta y vuelva a intentarlo."
+    exit 1
+}
