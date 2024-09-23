@@ -8,9 +8,8 @@ function Execute-MyQuery {
         [string]$IP  # Direcci�n IP en la que la API escucha
     )
 
-    # Validar que el archivo tenga la extensi�n .txt
-    if ([System.IO.Path]::GetExtension($QueryFile) -ne ".txt" -and [System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
-        Write-Host -ForegroundColor Red "Error: El archivo debe tener la extensi�n .txt o .tinysql."
+    if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
+        Write-Host -ForegroundColor Red "Error: El archivo debe tener la extension .tinysql."
         exit 1
     }
 
@@ -20,21 +19,13 @@ function Execute-MyQuery {
         exit 1
     }
 
-    # Manejo de errores al crear el EndPoint
-    try {
-        $ipAddress = [System.Net.IPAddress]::Parse($IP)
-    } catch {
-        Write-Host -ForegroundColor Red "Error: La direcci�n IP '$IP' es incorrecta. Verifique el formato."
-        exit 1
-    }
-
     if ($Port -lt 1 -or $Port -gt 65535) {
-        Write-Host -ForegroundColor Red "Error: El puerto '$Port' no es v�lido. Debe estar entre 1 y 65535."
+        Write-Host -ForegroundColor Red "Error: El puerto '$Port' no es valido. Debe estar entre 1 y 65535."
         exit 1
     }
 
     # Crear el EndPoint con IP v�lida y puerto correcto
-    $ipEndPoint = [System.Net.IPEndPoint]::new($ipAddress, $Port)
+$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
 
     function Send-Message {
         param (
@@ -79,7 +70,7 @@ function Execute-MyQuery {
         try {
             $client.Connect($ipEndPoint)
         } catch {
-            Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP :$Port. Verifique que la direcci�n IP y el puerto sean correctos, o si el servidor est� activo."
+            Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP :$Port. Verifique que la direccion IP y el puerto sean correctos, o si el servidor esta activo."
             exit 1
         }
         
@@ -101,17 +92,13 @@ function Execute-MyQuery {
         $client.Close()
     }
 
-    # Leer el archivo y enviar las sentencias al servidor
+    #Leer el archivo
     Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
-
-    # Leer archivo l�nea por l�nea
     $lines = Get-Content $QueryFile
     foreach ($line in $lines) {
         if (-not [string]::IsNullOrWhiteSpace($line)) {
             Send-SQLCommand -command $line
         }
     }
-}
 
-# Ejemplo de uso:
-# Execute-MyQuery -QueryFile "C:\ruta\del\archivo\script.txt" -Port 11000 -IP "127.0.0.1"  
+}
