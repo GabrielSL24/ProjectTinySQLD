@@ -26,7 +26,7 @@ function Send-Message {
     }
 }
 
-function Receive-Message {
+"function Receive-Message {
     param (
         [System.Net.Sockets.Socket]$client
     )
@@ -39,7 +39,7 @@ function Receive-Message {
         $reader.Close()
         $stream.Close()
     }
-}
+}"
 function Send-SQLCommand {
     param (
         [string]$command
@@ -65,5 +65,5 @@ function Send-SQLCommand {
 }
 
 # This is an example, should not be called here
-Send-SQLCommand -command "CREATE TABLE ESTUDIANTE"
-Send-SQlCommand -command "SELECT * FROM ESTUDIANTE"
+"Send-SQLCommand -command CREATE TABLE ESTUDIANTE"
+"Send-SQlCommand -command SELECT * FROM ESTUDIANTE"

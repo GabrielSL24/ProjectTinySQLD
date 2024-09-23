@@ -8,6 +8,7 @@ namespace StoreDataManager
     {
         private static Store? instance = null;
         private static readonly object _lock = new object();
+        private string NameDB;
                
         public static Store GetInstance()
         {
@@ -40,17 +41,19 @@ namespace StoreDataManager
             Directory.CreateDirectory(SystemCatalogPath);
         }
 
-        public OperationStatus CreateTable()
+        public OperationStatus CreateTable(string NameTable)
         {
             // Creates a default DB called TESTDB
-            Directory.CreateDirectory($@"{DataPath}\TESTDB");
+            //Directory.CreateDirectory($@"{DataPath}\TESTDB");
 
             // Creates a default Table called ESTUDIANTES
-            var tablePath = $@"{DataPath}\TESTDB\ESTUDIANTES.Table";
+            var tablePath = $@"{DataPath}\{NameDB}\{NameTable}.Table";
 
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
             using (BinaryWriter writer = new (stream))
             {
+                
+                
                 // Create an object with a hardcoded.
                 // First field is an int, second field is a string of size 30,
                 // third is a string of 50
@@ -62,6 +65,15 @@ namespace StoreDataManager
                 writer.Write(nombre);
                 writer.Write(apellido);
             }
+            Directory.CreateDirectory($@"{SystemTablesFile}\{NameTable}");
+            return OperationStatus.Success;
+        }
+
+        public OperationStatus CreateDataBase (string NameDATABASE)
+        {
+            NameDB = NameDATABASE;
+            Directory.CreateDirectory($@"{DataPath}\{NameDATABASE}");
+            Directory.CreateDirectory($@"{SystemDatabasesFile}\{NameDATABASE}");
             return OperationStatus.Success;
         }
 
