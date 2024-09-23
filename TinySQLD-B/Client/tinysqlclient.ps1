@@ -1,11 +1,11 @@
 function Execute-MyQuery {
     param (
         [Parameter(Mandatory = $true)]
-        [string]$QueryFile,  # Ruta del archivo con las sentencias SQL
+        [string]$QueryFile,  
         [Parameter(Mandatory = $true)]
-        [int]$Port,  # Puerto en el que la API escucha
+        [int]$Port,  
         [Parameter(Mandatory = $true)]
-        [string]$IP  # Direcci�n IP en la que la API escucha
+        [string]$IP  
     )
 
     if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
@@ -19,13 +19,7 @@ function Execute-MyQuery {
         exit 1
     }
 
-    if ($Port -lt 1 -or $Port -gt 65535) {
-        Write-Host -ForegroundColor Red "Error: El puerto '$Port' no es valido. Debe estar entre 1 y 65535."
-        exit 1
-    }
-
-    # Crear el EndPoint con IP v�lida y puerto correcto
-$ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
+    $ipEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($IP), $Port)
 
     function Send-Message {
         param (
