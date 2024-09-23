@@ -5,12 +5,12 @@ function Execute-MyQuery {
         [Parameter(Mandatory = $true)]
         [int]$Port,  # Puerto en el que la API escucha
         [Parameter(Mandatory = $true)]
-        [string]$IP  # Dirección IP en la que la API escucha
+        [string]$IP  # Direcciï¿½n IP en la que la API escucha
     )
 
-    # Validar que el archivo tenga la extensión .txt
+    # Validar que el archivo tenga la extensiï¿½n .txt
     if ([System.IO.Path]::GetExtension($QueryFile) -ne ".txt" -and [System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
-        Write-Host -ForegroundColor Red "Error: El archivo debe tener la extensión .txt o .tinysql."
+        Write-Host -ForegroundColor Red "Error: El archivo debe tener la extensiï¿½n .txt o .tinysql."
         exit 1
     }
 
@@ -24,16 +24,16 @@ function Execute-MyQuery {
     try {
         $ipAddress = [System.Net.IPAddress]::Parse($IP)
     } catch {
-        Write-Host -ForegroundColor Red "Error: La dirección IP '$IP' es incorrecta. Verifique el formato."
+        Write-Host -ForegroundColor Red "Error: La direcciï¿½n IP '$IP' es incorrecta. Verifique el formato."
         exit 1
     }
 
     if ($Port -lt 1 -or $Port -gt 65535) {
-        Write-Host -ForegroundColor Red "Error: El puerto '$Port' no es válido. Debe estar entre 1 y 65535."
+        Write-Host -ForegroundColor Red "Error: El puerto '$Port' no es vï¿½lido. Debe estar entre 1 y 65535."
         exit 1
     }
 
-    # Crear el EndPoint con IP válida y puerto correcto
+    # Crear el EndPoint con IP vï¿½lida y puerto correcto
     $ipEndPoint = [System.Net.IPEndPoint]::new($ipAddress, $Port)
 
     function Send-Message {
@@ -77,9 +77,9 @@ function Execute-MyQuery {
         $client = New-Object System.Net.Sockets.Socket($ipEndPoint.AddressFamily, [System.Net.Sockets.SocketType]::Stream, [System.Net.Sockets.ProtocolType]::Tcp)
         
         try {
-            $client.Connect($ipEndPoint -ErrorAction Stop)
+            $client.Connect($ipEndPoint)
         } catch {
-            Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP:$Port. Verifique que la dirección IP y el puerto sean correctos, o si el servidor está activo."
+            Write-Host -ForegroundColor Red "Error: No se pudo conectar al servidor en $IP :$Port. Verifique que la direcciï¿½n IP y el puerto sean correctos, o si el servidor estï¿½ activo."
             exit 1
         }
         
@@ -104,7 +104,7 @@ function Execute-MyQuery {
     # Leer el archivo y enviar las sentencias al servidor
     Write-Host -ForegroundColor Yellow "Leyendo el archivo de instrucciones: $QueryFile"
 
-    # Leer archivo línea por línea
+    # Leer archivo lï¿½nea por lï¿½nea
     $lines = Get-Content $QueryFile
     foreach ($line in $lines) {
         if (-not [string]::IsNullOrWhiteSpace($line)) {
