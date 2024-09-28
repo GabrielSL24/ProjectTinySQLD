@@ -8,7 +8,9 @@ namespace StoreDataManager
     {
         private static Store? instance = null;
         private static readonly object _lock = new object();
-        private string NameDB;
+        private static string NameDB;
+        private static int idTB = 0;
+        private static int idDB = 0;
                
         public static Store GetInstance()
         {
@@ -25,8 +27,9 @@ namespace StoreDataManager
         private const string DatabaseBasePath = @"C:\TinySql\";
         private const string DataPath = $@"{DatabaseBasePath}\Data";
         private const string SystemCatalogPath = $@"{DataPath}\SystemCatalog";
-        private const string SystemDatabasesFile = $@"{SystemCatalogPath}\SystemDatabases.table";
-        private const string SystemTablesFile = $@"{SystemCatalogPath}\SystemTables.table";
+        private const string SystemDatabasesFile = $@"{SystemCatalogPath}\SystemDatabases.Table";
+        private const string SystemTablesFile = $@"{SystemCatalogPath}\SystemTables.Table";
+        private const string SystemColumnFile = $@"{SystemCatalogPath}\SystemColumns.Table";
 
         public Store()
         {
@@ -41,12 +44,10 @@ namespace StoreDataManager
             Directory.CreateDirectory(SystemCatalogPath);
         }
 
-        public OperationStatus CreateTable(string NameTable)
+        public OperationStatus CreateTable(string NameTable, params(object value, ColumnType type)[] fields)
         {
-            // Creates a default DB called TESTDB
-            //Directory.CreateDirectory($@"{DataPath}\TESTDB");
 
-            // Creates a default Table called ESTUDIANTES
+            // Creates a default Table
             var tablePath = $@"{DataPath}\{NameDB}\{NameTable}.Table";
 
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
@@ -57,15 +58,74 @@ namespace StoreDataManager
                 // Create an object with a hardcoded.
                 // First field is an int, second field is a string of size 30,
                 // third is a string of 50
-                int id = 1;
-                string nombre = "Isaac".PadRight(30); // Pad to make the size of the string fixed
-                string apellido = "Ramirez".PadRight(50);
+                idTB += 1;
+                foreach (var field in fields)
+                {
+                    switch(field.type)
+                    {
+                        case ColumnType.Integer:
+                            if (field.value is int intvalue)
+                            {
+                                writer.Write(intvalue);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("El valor no coincide con en tipo Integer");
+                            }
+                            break;
+                        case ColumnType.DateTime:
+                            if (field.value is DateTime dtvalue)
+                            {
+                                writer.Write(dtvalue.ToBinary());
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("El valor no coincide con el tipo DateTime.");
+                            }
+                            break;
+                        case ColumnType.Double:
+                            if (field.value is double doublevalue)
+                            {
+                                writer.Write(doublevalue);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("El valor no coincide con el tipo Double.");
+                            }
+                            break;
+                        case ColumnType.Varchar:
+                            if (field.value is string strValue)
+                            {
+                                writer.Write(strValue.ToCharArray());
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("El valor no coincide con el tipo Varchar.");
+                            }
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Tipo no soportado: {field.type}");
+                    }
+                }
+
+                //string nombre = "Isaac".PadRight(30); // Pad to make the size of the string fixed
+                //string apellido = "Ramirez".PadRight(50);
+
+                //writer.Write(idTB);
+                //writer.Write(nombre);
+                //writer.Write(apellido);
+            }
+            // Directory.CreateDirectory($@"{SystemTablesFile}\{NameTable}");s
+            var TBpath = SystemTablesFile;
+            using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
+            using (BinaryWriter writer = new (stream))
+            {
+                int id = idTB;
+                string Table = NameTable.PadRight(15);
 
                 writer.Write(id);
-                writer.Write(nombre);
-                writer.Write(apellido);
+                writer.Write(Table);
             }
-            Directory.CreateDirectory($@"{SystemTablesFile}\{NameTable}");
             return OperationStatus.Success;
         }
 
@@ -73,18 +133,32 @@ namespace StoreDataManager
         {
             NameDB = NameDATABASE;
             Directory.CreateDirectory($@"{DataPath}\{NameDATABASE}");
-            Directory.CreateDirectory($@"{SystemDatabasesFile}\{NameDATABASE}");
+            var DBpath = SystemDatabasesFile;
+            using (FileStream stream = new FileStream(DBpath, FileMode.Append, FileAccess.Write))
+            using (BinaryWriter writer = new(stream))
+            {
+                idDB =+ 1;
+                string Database = NameDATABASE.PadRight(15);
+
+                writer.Write(idDB);
+                writer.Write(Database);
+            }
+            return OperationStatus.Success;
+        }
+
+        public OperationStatus CreateColumn()
+        {
             return OperationStatus.Success;
         }
 
         public OperationStatus Select()
         {
             // Creates a default Table called ESTUDIANTES
-            var tablePath = $@"{DataPath}\TESTDB\ESTUDIANTES.Table";
+            var tablePath = $@"{DataPath}\Universidad\Funcionarios.Table";
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
             using (BinaryReader reader = new (stream))
             {
-                // Print the values as a I know exactly the types, but this needs to be done right
+                // Print the values as a I know exactly the types, but this needs to be done right11
                 Console.WriteLine(reader.ReadInt32());
                 Console.WriteLine(reader.ReadString());
                 Console.WriteLine(reader.ReadString());

@@ -1,3 +1,5 @@
-CREATE TABLE Estudiante;
+CREATE DATABASE Universidad;
+
+CREATE TABLE Funcionarios;
 
 SELECT * FROM Estudiante;

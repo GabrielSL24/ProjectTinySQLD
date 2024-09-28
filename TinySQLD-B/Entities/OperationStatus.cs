@@ -6,4 +6,11 @@
         Error,
         Warning
     }
+    public enum ColumnType
+    {
+        Integer,
+        DateTime,
+        Double,
+        Varchar
+    }
 }
