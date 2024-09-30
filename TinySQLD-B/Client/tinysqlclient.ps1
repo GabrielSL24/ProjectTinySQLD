@@ -96,3 +96,21 @@ function Execute-MyQuery {
     }
 
 }
+
+function validateFile{
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$QueryFile
+    )
+
+    if ([System.IO.Path]::GetExtension($QueryFile) -ne ".tinysql") {
+        Write-Host -ForegroundColor Red "Error: El archivo debe tener la extension .tinysql."
+        exit 1
+    }
+
+    # Verificar si el archivo existe
+    if (-not (Test-Path $QueryFile)) {
+        Write-Host -ForegroundColor Red "Error: El archivo $QueryFile no existe. Verifique la ruta."
+        exit 1
+    }
+}
