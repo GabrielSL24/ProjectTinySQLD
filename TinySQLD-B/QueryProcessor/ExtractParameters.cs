@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using QueryProcessor;
+using System.Text.RegularExpressions;
 
 public class ExtractParameters
 {
@@ -9,7 +10,6 @@ public class ExtractParameters
         return match.Groups[1].Value;
     }
 
-    //#TODO: Cambiar metodo de extraccion 
     // Extraer los parámetros de la tabla para CREATE TABLE
     public (string tableName, Dictionary<string, (string type, int? length)> columns) ExtractCreateTableParameters(string sentence)
     {
@@ -90,14 +90,28 @@ public class ExtractParameters
     }
 
     // Extraer parámetros para INSERT INTO
-    public (string tableName, List<string> values) ExtractInsertParameters(string sentence)
+    public (string tableName, StringList values) ExtractInsertParameters(string sentence)
     {
         var match = Regex.Match(sentence, @"INSERT\s+INTO\s+(\w+)\s+\((.+)\)", RegexOptions.IgnoreCase);
+
+        if (!match.Success)
+        {
+            throw new Exception("Error en la sintaxis de INSERT.");
+        }
+
         string tableName = match.Groups[1].Value;
-        List<string> values = new List<string>(match.Groups[2].Value.Split(','));
+        StringList values = new StringList();
+
+        // Separar los valores por comas y agregarlos a nuestra estructura personalizada
+        string[] splitValues = match.Groups[2].Value.Split(',');
+        foreach (string value in splitValues)
+        {
+            values.Add(value.Trim());  // Agregamos cada valor, eliminando espacios
+        }
 
         return (tableName, values);
     }
+
 
     // Extraer parámetros para UPDATE
     public (string tableName, (string columnName, string newValue) setClause, (string columnName, string compareOperator, string value)? whereClause) ExtractUpdateParameters(string sentence)
