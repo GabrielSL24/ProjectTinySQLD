@@ -100,32 +100,51 @@ public class ExtractParameters
     }
 
     // Extraer parámetros para UPDATE
-    public (string tableName, (string columnName, string newValue) setClause, (string columnName, string compareOperator, string value) whereClause) ExtractUpdateParameters(string sentence)
+    public (string tableName, (string columnName, string newValue) setClause, (string columnName, string compareOperator, string value)? whereClause) ExtractUpdateParameters(string sentence)
     {
-        var match = Regex.Match(sentence, @"UPDATE\s+(\w+)\s+SET\s+(\w+)\s*=\s*(.+)\s+WHERE\s+(\w+)\s*(==|<|>|LIKE|NOT)\s*(.+);", RegexOptions.IgnoreCase);
+        // Actualizamos la expresión regular para manejar los valores con comillas
+        var match = Regex.Match(sentence, @"UPDATE\s+(\w+)\s+SET\s+(\w+)\s*=\s*""([^""]+)""\s*(WHERE\s+(\w+)\s*(==|<|>|LIKE|NOT)\s*(\S+))?;", RegexOptions.IgnoreCase);
+
+        if (!match.Success)
+        {
+            throw new Exception("Error en la sintaxis de UPDATE.");
+        }
 
         // Nombre de la tabla
         string tableName = match.Groups[1].Value;
 
-        // SET clause
+        // SET clause (nombre de la columna y el nuevo valor entre comillas)
         (string columnName, string newValue) setClause = (match.Groups[2].Value, match.Groups[3].Value);
 
-        // WHERE clause (column-name, compare-operator, value)
-        (string columnName, string compareOperator, string value) whereClause = (match.Groups[4].Value, match.Groups[5].Value, match.Groups[6].Value);
+        // WHERE clause (column-name, compare-operator, value), opcional
+        (string columnName, string compareOperator, string value)? whereClause = null;
+        if (match.Groups[5].Success && match.Groups[6].Success && match.Groups[7].Success)
+        {
+            whereClause = (match.Groups[5].Value, match.Groups[6].Value, match.Groups[7].Value);
+        }
 
         return (tableName, setClause, whereClause);
     }
 
     // Extraer parámetros para DELETE
-    public (string tableName, (string columnName, string compareOperator, string value) whereClause) ExtractDeleteParameters(string sentence)
+    public (string tableName, (string columnName, string compareOperator, string value)? whereClause) ExtractDeleteParameters(string sentence)
     {
-        var match = Regex.Match(sentence, @"DELETE\s+FROM\s+(\w+)\s+WHERE\s+(\w+)\s*(==|<|>|LIKE|NOT)\s*(.+);", RegexOptions.IgnoreCase);
+        var match = Regex.Match(sentence, @"DELETE\s+FROM\s+(\w+)\s*(WHERE\s+(\w+)\s*(==|<|>|LIKE|NOT)\s*(.+))?;", RegexOptions.IgnoreCase);
+
+        if (!match.Success)
+        {
+            throw new Exception("Error en la sintaxis de DELETE.");
+        }
 
         // Nombre de la tabla
         string tableName = match.Groups[1].Value;
 
         // WHERE clause (column-name, compare-operator, value)
-        (string columnName, string compareOperator, string value) whereClause = (match.Groups[2].Value, match.Groups[3].Value, match.Groups[4].Value);
+        (string columnName, string compareOperator, string value)? whereClause = null;
+        if (match.Groups[3].Success && match.Groups[4].Success && match.Groups[5].Success)
+        {
+            whereClause = (match.Groups[3].Value, match.Groups[4].Value, match.Groups[5].Value);
+        }
 
         return (tableName, whereClause);
     }

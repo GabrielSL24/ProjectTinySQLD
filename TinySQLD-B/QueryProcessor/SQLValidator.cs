@@ -32,7 +32,6 @@ public class SQLValidator
         return Regex.IsMatch(sentence, @"^SELECT\s+(\*|\w+(\s*,\s*\w+)*)\s+FROM\s+\w+(\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+)?(\s+ORDER\s+BY\s+\w+\s*(ASC|DESC))?$", RegexOptions.IgnoreCase);
     }
 
-
     // Validar INSERT INTO
     public bool IsInsertInto(string sentence)
     {
@@ -42,13 +41,13 @@ public class SQLValidator
     // Validar UPDATE
     public bool IsUpdate(string sentence)
     {
-        return Regex.IsMatch(sentence, @"^UPDATE\s+\w+\s+SET\s+\w+\s*=\s*.+\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+$", RegexOptions.IgnoreCase);
+        return Regex.IsMatch(sentence, @"^UPDATE\s+\w+\s+SET\s+\w+\s*=\s*.+\s+WHERE\s+\w+\s*(==|<|>|LIKE|NOT)\s*.+$", RegexOptions.IgnoreCase);
     }
 
     // Validar DELETE
     public bool IsDelete(string sentence)
     {
-        return Regex.IsMatch(sentence, @"^DELETE\s+FROM\s+\w+\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+$", RegexOptions.IgnoreCase);
+        return Regex.IsMatch(sentence, @"^DELETE\s+FROM\s+\w+\s+WHERE\s+\w+\s*(==|<|>|LIKE|NOT)\s*.+$", RegexOptions.IgnoreCase);
     }
 
     // Validar INDEX
