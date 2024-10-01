@@ -49,31 +49,37 @@ public class ExtractParameters
     }
 
     // Extraer los parámetros de SELECT
-    public (List<string> columns, string tableName, (string columnName, string compareOperator, string value) whereClause, (string columnName, string order) orderBy) ExtractSelectParameters(string sentence)
+    public (string column, string tableName, (string columnName, string compareOperator, string value)? whereClause, (string columnName, string order)? orderBy) ExtractSelectParameters(string sentence)
     {
-        var match = Regex.Match(sentence, @"SELECT\s+(.+)\s+FROM\s+(\w+)\s*(WHERE\s+(\w+)\s*(=|<|>|LIKE|NOT)\s*(.+))?\s*(ORDER\s+BY\s+(\w+)\s*(ASC|DESC))?", RegexOptions.IgnoreCase);
+        // Expresión regular para extraer la columna, tabla, where y order by
+        var match = Regex.Match(sentence, @"SELECT\s+(\*|\w+)\s+FROM\s+(\w+)\s*(WHERE\s+(\w+)\s*(=|<|>|LIKE|NOT)\s*(\S+))?\s*(ORDER\s+BY\s+(\w+)\s*(ASC|DESC))?", RegexOptions.IgnoreCase);
 
-        // Columnas a seleccionar
-        List<string> columns = new List<string>(match.Groups[1].Value.Split(','));
+        if (!match.Success)
+        {
+            throw new Exception("Error en la sintaxis de SELECT.");
+        }
+
+        // Extraer columna
+        string column = match.Groups[1].Value;
 
         // Nombre de la tabla
         string tableName = match.Groups[2].Value;
 
-        // WHERE statement (column-name, compare-operator, value)
-        (string columnName, string compareOperator, string value) whereClause = (null, null, null);
+        // WHERE clause
+        (string columnName, string compareOperator, string value)? whereClause = null;
         if (match.Groups[4].Success && match.Groups[5].Success && match.Groups[6].Success)
         {
             whereClause = (match.Groups[4].Value, match.Groups[5].Value, match.Groups[6].Value);
         }
 
-        // ORDER BY statement (column-name, asc/desc)
-        (string columnName, string order) orderBy = (null, null);
+        // ORDER BY clause
+        (string columnName, string order)? orderBy = null;
         if (match.Groups[8].Success && match.Groups[9].Success)
         {
             orderBy = (match.Groups[8].Value, match.Groups[9].Value);
         }
 
-        return (columns, tableName, whereClause, orderBy);
+        return (column, tableName, whereClause, orderBy);
     }
 
     // Extraer nombre de tabla para DROP TABLE

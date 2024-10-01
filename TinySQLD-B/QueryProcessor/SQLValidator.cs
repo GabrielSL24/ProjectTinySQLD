@@ -29,7 +29,7 @@ public class SQLValidator
     // Validar SELECT
     public bool IsSelect(string sentence)
     {
-        return Regex.IsMatch(sentence, @"^SELECT\s+.+\s+FROM\s+\w+(\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+)?(\s+ORDER\s+BY\s+\w+\s*(ASC|DESC))?$", RegexOptions.IgnoreCase);
+        return Regex.IsMatch(sentence, @"^SELECT\s+(\*|\w+(\s*,\s*\w+)*)\s+FROM\s+\w+(\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+)?(\s+ORDER\s+BY\s+\w+\s*(ASC|DESC))?$", RegexOptions.IgnoreCase);
     }
 
 
