@@ -48,8 +48,6 @@ public class ExtractParameters
         return (tableName, columns);
     }
 
-
-
     // Extraer los parámetros de SELECT
     public (List<string> columns, string tableName, (string columnName, string compareOperator, string value) whereClause, (string columnName, string order) orderBy) ExtractSelectParameters(string sentence)
     {
@@ -77,7 +75,6 @@ public class ExtractParameters
 
         return (columns, tableName, whereClause, orderBy);
     }
-
 
     // Extraer nombre de tabla para DROP TABLE
     public string ExtractTableName(string sentence)
@@ -126,5 +123,25 @@ public class ExtractParameters
 
         return (tableName, whereClause);
     }
+
+    // Extraer parámetros para INDEX
+    public (string indexName, string tableName, string columnName, string type) ExtractCreateIndexParameters(string sentence)
+    {
+        // Extraer el nombre del índice, el nombre de la tabla, la columna y el tipo de índice
+        var match = Regex.Match(sentence, @"CREATE\s+INDEX\s+(\w+)\s+ON\s+(\w+)\s*\((\w+)\)\s+OF\s+TYPE\s+(BTREE|BST)", RegexOptions.IgnoreCase);
+
+        if (!match.Success)
+        {
+            throw new Exception("Error en la sintaxis de CREATE INDEX.");
+        }
+
+        string indexName = match.Groups[1].Value;
+        string tableName = match.Groups[2].Value;
+        string columnName = match.Groups[3].Value;
+        string type = match.Groups[4].Value;
+
+        return (indexName, tableName, columnName, type);
+    }
+
 }
 

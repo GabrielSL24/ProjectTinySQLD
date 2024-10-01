@@ -50,5 +50,12 @@ public class SQLValidator
     {
         return Regex.IsMatch(sentence, @"^DELETE\s+FROM\s+\w+\s+WHERE\s+\w+\s*(=|<|>|LIKE|NOT)\s*.+$", RegexOptions.IgnoreCase);
     }
+
+    // Validar INDEX
+    public bool IsCreateIndex(string sentence)
+    {
+        return Regex.IsMatch(sentence, @"^CREATE\s+INDEX\s+\w+\s+ON\s+\w+\s*\(\w+\)\s+OF\s+TYPE\s+(BTREE|BST)$", RegexOptions.IgnoreCase);
+    }
+
 }
 

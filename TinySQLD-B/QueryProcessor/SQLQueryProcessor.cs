@@ -37,30 +37,40 @@ namespace QueryProcessor
                 var selectParams = extractor.ExtractSelectParameters(sentence);
                 return new Select().Execute();
             }
-            // Verificar otras sentencias SQL (DROP TABLE, INSERT INTO, etc.)
+            // Verificar si la sentencia corresponde a "DROP TABLE"
             else if (validator.IsDropTable(sentence))
             {
                 string tableName = extractor.ExtractTableName(sentence);
                 throw new NotImplementedException();
                 //return new DropTable().Execute(tableName);
             }
+            // Verificar si la sentencia corresponde a "INSERT INTO"
             else if (validator.IsInsertInto(sentence))
             {
                 var insertParams = extractor.ExtractInsertParameters(sentence);
                 throw new NotImplementedException();
                 //return new InsertInto().Execute(insertParams);
             }
+            // Verificar si la sentencia corresponde a "UPDATE"
             else if (validator.IsUpdate(sentence))
             {
                 var updateParams = extractor.ExtractUpdateParameters(sentence);
                 throw new NotImplementedException();
                 //return new Update().Execute(updateParams);
             }
+            // Verificar si la sentencia corresponde a "DELETE"
             else if (validator.IsDelete(sentence))
             {
                 var deleteParams = extractor.ExtractDeleteParameters(sentence);
                 throw new NotImplementedException();
                 //return new Delete().Execute(deleteParams);
+            }
+            // Verificar si la sentencia corresponde a "INDEX"
+            else if (validator.IsCreateIndex(sentence))
+            {
+                var indexParams = extractor.ExtractCreateIndexParameters(sentence);
+                throw new NotImplementedException();
+                //return new CreateIndex().Execute(indexParams);
             }
             else
             {
