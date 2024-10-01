@@ -7,10 +7,10 @@ namespace QueryProcessor
 {
     public class SQLQueryProcessor
     {
-        private SQLValidator validator = new SQLValidator();
-        private ExtractParameters extractor = new ExtractParameters();
+        static private SQLValidator validator = new SQLValidator();
+        static private ExtractParameters extractor = new ExtractParameters();
 
-        public OperationStatus Execute(string sentence)
+        public static OperationStatus Execute(string sentence)
         {
             // Verificar si la sentencia corresponde a "CREATE DATABASE"
             if (validator.IsCreateDatabase(sentence))

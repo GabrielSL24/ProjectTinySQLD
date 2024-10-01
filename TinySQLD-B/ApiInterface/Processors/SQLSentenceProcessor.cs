@@ -5,7 +5,7 @@ using QueryProcessor;
 
 namespace ApiInterface.Processors
 {
-    internal class SQLSentenceProcessor(Request request) : IProcessor 
+    internal class SQLSentenceProcessor(Request request) : IProcessor
     {
         public Request Request { get; } = request;
 
