@@ -15,7 +15,7 @@ function Execute-MyQuery {
     $ipEndPoint = Get-EndPoint -IP $IP -Port $Port
 
     # Leer y procesar el archivo
-    Process-QueryFile -QueryFile $QueryFile -ipEndPoint $ipEndPoint -Port $Port -IP $IP
+    ProcessQueryFile -QueryFile $QueryFile -ipEndPoint $ipEndPoint -Port $Port -IP $IP
 }
 
 function validateFile {
@@ -52,7 +52,7 @@ function Get-EndPoint {
     }
 }
 
-function Process-QueryFile {
+function ProcessQueryFile {
     param (
         [Parameter(Mandatory = $true)]
         [string]$QueryFile,
@@ -65,7 +65,18 @@ function Process-QueryFile {
     $lines = Get-Content $QueryFile
     foreach ($line in $lines) {
         if (-not [string]::IsNullOrWhiteSpace($line)) {
+            # Iniciar temporizador
+            $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+
+            # Ejecutar el comando SQL
             Send-SQLCommand -command $line -ipEndPoint $ipEndPoint -Port $Port -IP $IP
+
+            # Detener temporizador
+            $stopwatch.Stop()
+            $elapsedTime = $stopwatch.ElapsedMilliseconds
+
+            # Mostrar el tiempo transcurrido en milisegundos
+            Write-Host -ForegroundColor Cyan "El comando '$line' tardó $elapsedTime ms en ejecutarse."
         }
     }
 }
