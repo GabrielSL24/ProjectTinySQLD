@@ -1,5 +1,5 @@
-﻿using StoreDataManager;
-using Entities;
+﻿using Entities;
+using StoreDataManager;
 
 
 namespace QueryProcessor.Operations
