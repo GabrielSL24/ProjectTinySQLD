@@ -112,7 +112,6 @@ public class ExtractParameters
         return (tableName, values);
     }
 
-
     // Extraer parámetros para UPDATE
     public (string tableName, (string columnName, string newValue) setClause, (string columnName, string compareOperator, string value)? whereClause) ExtractUpdateParameters(string sentence)
     {
