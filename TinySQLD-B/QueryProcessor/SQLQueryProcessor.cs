@@ -20,7 +20,12 @@ namespace QueryProcessor
             {
                 string NameTB = ExtractName.Extract(sentence);
                 return new CreateTable().Execute(NameTB);
-            }   
+            }
+            if (sentence.StartsWith("DROP TABLE"))
+            {
+                string NameDrop = ExtractName.Extract(sentence);
+                return new DropTable().Execute(NameDrop);
+            }
             if (sentence.StartsWith("SELECT"))
             {
                 return new Select().Execute();

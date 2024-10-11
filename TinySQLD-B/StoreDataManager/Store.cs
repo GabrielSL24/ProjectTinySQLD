@@ -1,4 +1,5 @@
 ﻿using Entities;
+using StoreDataManager.Checks;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
@@ -149,6 +150,19 @@ namespace StoreDataManager
         public OperationStatus CreateColumn()
         {
             return OperationStatus.Success;
+        }
+
+        public OperationStatus DropTable(string Table)
+        {
+            if (CheckTables.Check(SystemTablesFile, Table) == true)
+            {
+                File.Delete(Table);
+                Console.WriteLine($"Se elimino {Table}");
+
+                CheckTables.RemoveTable(SystemTablesFile, Table);
+                return OperationStatus.Success;
+            }
+            return OperationStatus.Error;
         }
 
         public OperationStatus Select()
