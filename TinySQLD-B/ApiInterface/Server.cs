@@ -1,11 +1,10 @@
-﻿using System.Net.Sockets;
-using System.Net;
-using System.Text;
+﻿using ApiInterface.Exceptions;
 using ApiInterface.InternalModels;
-using System.Text.Json;
-using ApiInterface.Exceptions;
-using ApiInterface.Processors;
 using ApiInterface.Models;
+using ApiInterface.Processors;
+using System.Net;
+using System.Net.Sockets;
+using System.Text.Json;
 
 namespace ApiInterface
 {
@@ -77,6 +76,6 @@ namespace ApiInterface
             throw new NotImplementedException();
         }
 
-        
+
     }
 }

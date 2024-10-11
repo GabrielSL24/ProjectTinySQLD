@@ -1,7 +1,5 @@
 ﻿using Entities;
 using StoreDataManager.Checks;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
 namespace StoreDataManager
 {
@@ -12,12 +10,12 @@ namespace StoreDataManager
         private static string NameDB;
         private static int idTB = 0;
         private static int idDB = 0;
-               
+
         public static Store GetInstance()
         {
-            lock(_lock)
+            lock (_lock)
             {
-                if (instance == null) 
+                if (instance == null)
                 {
                     instance = new Store();
                 }
@@ -35,7 +33,7 @@ namespace StoreDataManager
         public Store()
         {
             this.InitializeSystemCatalog();
-            
+
         }
 
         private void InitializeSystemCatalog()
@@ -45,24 +43,24 @@ namespace StoreDataManager
             Directory.CreateDirectory(SystemCatalogPath);
         }
 
-        public OperationStatus CreateTable(string NameTable, params(object value, ColumnType type)[] fields)
+        public OperationStatus CreateTable(string NameTable, params (object value, ColumnType type)[] fields)
         {
 
             // Creates a default Table
             var tablePath = $@"{DataPath}\{NameDB}\{NameTable}.Table";
 
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
-            using (BinaryWriter writer = new (stream))
+            using (BinaryWriter writer = new(stream))
             {
-                
-                
+
+
                 // Create an object with a hardcoded.
                 // First field is an int, second field is a string of size 30,
                 // third is a string of 50
                 idTB += 1;
                 foreach (var field in fields)
                 {
-                    switch(field.type)
+                    switch (field.type)
                     {
                         case ColumnType.Integer:
                             if (field.value is int intvalue)
@@ -119,7 +117,7 @@ namespace StoreDataManager
             // Directory.CreateDirectory($@"{SystemTablesFile}\{NameTable}");s
             var TBpath = SystemTablesFile;
             using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
-            using (BinaryWriter writer = new (stream))
+            using (BinaryWriter writer = new(stream))
             {
                 int id = idTB;
                 string Table = NameTable.PadRight(15);
@@ -130,7 +128,7 @@ namespace StoreDataManager
             return OperationStatus.Success;
         }
 
-        public OperationStatus CreateDataBase (string NameDATABASE)
+        public OperationStatus CreateDataBase(string NameDATABASE)
         {
             NameDB = NameDATABASE;
             Directory.CreateDirectory($@"{DataPath}\{NameDATABASE}");
@@ -138,7 +136,7 @@ namespace StoreDataManager
             using (FileStream stream = new FileStream(DBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
             {
-                idDB =+ 1;
+                idDB = +1;
                 string Database = NameDATABASE.PadRight(15);
 
                 writer.Write(idDB);
@@ -170,7 +168,7 @@ namespace StoreDataManager
             // Creates a default Table called ESTUDIANTES
             var tablePath = $@"{DataPath}\Universidad\Funcionarios.Table";
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
-            using (BinaryReader reader = new (stream))
+            using (BinaryReader reader = new(stream))
             {
                 // Print the values as a I know exactly the types, but this needs to be done right11
                 Console.WriteLine(reader.ReadInt32());
