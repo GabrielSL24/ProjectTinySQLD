@@ -11,25 +11,35 @@ namespace StoreDataManager.Checks
 {
     internal class CheckTables
     {
-        internal static bool Check(string path, string name)
+        internal static bool CheckTB(string path, string name)
         {
             using (FileStream stream = File.Open(path, FileMode.OpenOrCreate))
             using (BinaryReader reader = new(stream))
             {
                 try
                 {
+                    int nameSize = 15;
+                    byte[] nameBuffer = new byte[nameSize];
+
                     while (stream.Position < stream.Length)
                     {
-                        int skip = reader.ReadInt32();
-                        Console.WriteLine($"Bytes para saltar: {skip}");
+                        int currentID = reader.ReadInt32();
+                        Console.WriteLine($"ID leído {currentID}");
 
-                        string currentName = reader.ReadString().Trim();
-                        Console.WriteLine($"Nombre leido: {currentName}");
+                        int bytesRead = reader.Read(nameBuffer, 0, nameSize);
 
-                        if (currentName.Equals(name.Trim(), StringComparison.Ordinal))
+                        if (bytesRead < nameSize)
                         {
-                            int tableContent = reader.ReadInt32();
-                            if (tableContent > 0)
+                            Console.WriteLine("No hay suficiente bytes para leer el nombre");
+                            return false;
+                        }
+
+                        string currentName = Encoding.UTF8.GetString(nameBuffer).Trim();
+                        Console.WriteLine($"Nombre leído: {currentName}");
+
+                        if (currentName.Equals(name.Trim(), StringComparison.Ordinal)) ;
+                        {
+                            if (reader.ReadInt32() > 0)
                             {
                                 return true;
                             }
@@ -39,8 +49,6 @@ namespace StoreDataManager.Checks
                                 return false;
                             }
                         }
-                        reader.BaseStream.Seek(skip, SeekOrigin.Current);
-
                     }
                 }
                 catch (EndOfStreamException)
@@ -55,11 +63,13 @@ namespace StoreDataManager.Checks
             return false;
         }
 
-        internal static void RemoveTable(string path, string TableName)
+        internal static void RemoveTable(string pathDB,string path, string TableName)
         {
             int sizeB = 19;
-            int nameOffset = 5;
-            int nameLength = 14;
+            int idOffset = 0;
+            int idLength = 4;
+            int nameOffset = 4;
+            int nameLength = 15;
             string tempPath = Path.GetTempFileName();
             try
             {
@@ -72,9 +82,18 @@ namespace StoreDataManager.Checks
                     {
                         long recordPosition = originalStream.Position;
                         byte[] recordData = reader.ReadBytes(sizeB);
+
                         if (recordData.Length >= nameOffset + nameLength)
                         {
-                            string recordString = Encoding.UTF8.GetString(recordData, nameOffset, nameLength).Trim();
+                            int id = BitConverter.ToInt32(recordData, idOffset);
+
+                            Console.WriteLine($"Bytes del ID (hex): {BitConverter.ToString(recordData, idOffset, idLength)}");
+                            Console.WriteLine($"ID convertido: {id}");
+
+
+                            string recordString = Encoding.ASCII.GetString(recordData, nameOffset, nameLength).Trim();
+                            recordString = new string(recordString.Where(c => !char.IsControl(c)).ToArray());
+
                             if (!recordString.Equals(TableName.Trim(), StringComparison.Ordinal))
                             {
                                 writer.Write(recordData);
@@ -82,6 +101,8 @@ namespace StoreDataManager.Checks
                             else
                             {
                                 Console.WriteLine($"Registro {TableName} encontrando en posición {recordPosition} y será eliminado");
+                                Console.WriteLine($"El id es: {id}");
+                                CheckDatabases.CheckDB(pathDB, id, TableName);
                             }
                         }
                         else
@@ -105,7 +126,6 @@ namespace StoreDataManager.Checks
                     File.Delete(tempPath);
                 }
             }
-            
         }
     }
 }
