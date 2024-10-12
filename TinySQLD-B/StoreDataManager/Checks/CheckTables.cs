@@ -102,7 +102,16 @@ namespace StoreDataManager.Checks
                             {
                                 Console.WriteLine($"Registro {TableName} encontrando en posición {recordPosition} y será eliminado");
                                 Console.WriteLine($"El id es: {id}");
-                                CheckDatabases.CheckDB(pathDB, id, TableName);
+                                if (CheckDatabases.CheckDB(pathDB, id, TableName))
+                                {
+                                    File.Delete(path);
+                                    File.Move(tempPath, path);
+                                    Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");   
+                                }
+                                else
+                                {
+                                    Console.WriteLine("El archivo no está vacio.");
+                                }
                             }
                         }
                         else
@@ -111,9 +120,9 @@ namespace StoreDataManager.Checks
                         }
                     }
                 }
-                File.Delete(path);
-                File.Move(tempPath, path);
-                Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");
+                //File.Delete(path);
+                //File.Move(tempPath, path);
+                //Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");
             }
             catch (Exception ex)
             {
