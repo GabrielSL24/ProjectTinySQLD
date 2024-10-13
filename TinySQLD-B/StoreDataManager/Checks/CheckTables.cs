@@ -11,87 +11,40 @@ namespace StoreDataManager.Checks
 {
     internal class CheckTables
     {
-        internal static bool CheckTB(string path, string name)
-        {
-            using (FileStream stream = File.Open(path, FileMode.OpenOrCreate))
-            using (BinaryReader reader = new(stream))
-            {
-                try
-                {
-                    int nameSize = 15;
-                    byte[] nameBuffer = new byte[nameSize];
-
-                    while (stream.Position < stream.Length)
-                    {
-                        int currentID = reader.ReadInt32();
-                        Console.WriteLine($"ID leído {currentID}");
-
-                        int bytesRead = reader.Read(nameBuffer, 0, nameSize);
-
-                        if (bytesRead < nameSize)
-                        {
-                            Console.WriteLine("No hay suficiente bytes para leer el nombre");
-                            return false;
-                        }
-
-                        string currentName = Encoding.UTF8.GetString(nameBuffer).Trim();
-                        Console.WriteLine($"Nombre leído: {currentName}");
-
-                        if (currentName.Equals(name.Trim(), StringComparison.Ordinal)) ;
-                        {
-                            if (reader.ReadInt32() > 0)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                stream.Close();
-                                return false;
-                            }
-                        }
-                    }
-                }
-                catch (EndOfStreamException)
-                {
-                    Console.WriteLine("Fin del archivo");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error leyendo archivo: {ex.Message}");
-                }
-            }
-            return false;
-        }
-
+        //Función para eliminar la tabla
         internal static void RemoveTable(string pathDB,string path, string TableName)
         {
-            int sizeB = 19;
-            int idOffset = 0;
-            int idLength = 4;
-            int nameOffset = 4;
-            int nameLength = 15;
-            string tempPath = Path.GetTempFileName();
+            //Define los tamaños y posiciones para los datos del archivo binario
+            int sizeB = 19;                 //tamaño
+            int idOffset = 0;               //Posición actual
+            int idLength = 4;               //Longitud de ID (bytes)
+            int nameOffset = 4;             //Posición inicial del nombre
+            int nameLength = 15;            //Longitud del nombre (bytes)
+            bool recordDelete = false;      
+            string tempPath = Path.GetTempFileName();   //Crea un archivo temporal
             try
             {
+                //Abre el archivo original para lectura y archivo temporal para escritura
                 using (FileStream originalStream = new FileStream(path, FileMode.Open, FileAccess.Read))
                 using (BinaryReader reader = new BinaryReader(originalStream))
                 using (FileStream tempStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
                 using (BinaryWriter writer =  new BinaryWriter(tempStream))
                 {
-                    while (originalStream.Position < originalStream.Length)
+                    //Recorre el archivo original hasta llegar al final
+                    while (originalStream.Position < originalStream.Length)         
                     {
-                        long recordPosition = originalStream.Position;
+                        long recordPosition = originalStream.Position;     
                         byte[] recordData = reader.ReadBytes(sizeB);
 
-                        if (recordData.Length >= nameOffset + nameLength)
+                        //Verifica si el tamaño del registro leído es suficiente para contener ID y nombre
+                        if (recordData.Length >= nameOffset + nameLength)           
                         {
                             int id = BitConverter.ToInt32(recordData, idOffset);
-
-                            Console.WriteLine($"Bytes del ID (hex): {BitConverter.ToString(recordData, idOffset, idLength)}");
                             Console.WriteLine($"ID convertido: {id}");
 
-
-                            string recordString = Encoding.ASCII.GetString(recordData, nameOffset, nameLength).Trim();
+                            //Extrae el nombre del resgistro (15 bytes desde la posición 4)
+                            string recordString = Encoding.ASCII.GetString(recordData, nameOffset, nameLength).Trim();  
+                            //Elimina caracteres de control del nombre extraído
                             recordString = new string(recordString.Where(c => !char.IsControl(c)).ToArray());
 
                             if (!recordString.Equals(TableName.Trim(), StringComparison.Ordinal))
@@ -100,16 +53,16 @@ namespace StoreDataManager.Checks
                             }
                             else
                             {
+                                //Si coinciden los nombres, se intenta eliminar el registro
                                 Console.WriteLine($"Registro {TableName} encontrando en posición {recordPosition} y será eliminado");
                                 Console.WriteLine($"El id es: {id}");
-                                if (CheckDatabases.CheckDB(pathDB, id, TableName))
+                                if (CheckDatabases.RemoveDatabases(pathDB, id, TableName))
                                 {
-                                    File.Delete(path);
-                                    File.Move(tempPath, path);
-                                    Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");   
+                                    recordDelete = true;
                                 }
                                 else
                                 {
+                                    writer.Write(recordData);
                                     Console.WriteLine("El archivo no está vacio.");
                                 }
                             }
@@ -120,9 +73,19 @@ namespace StoreDataManager.Checks
                         }
                     }
                 }
-                //File.Delete(path);
-                //File.Move(tempPath, path);
-                //Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");
+                //Si se eliminó un registro, reemplaza el archivo original con el temporal
+                if (recordDelete)
+                {
+                    File.Delete(path);
+                    File.Move(tempPath, path);
+                    Console.WriteLine($"El registro {TableName} ha sido eliminado fisicamente del archivo");
+                }
+                else
+                {
+                    Console.WriteLine("No se eliminó ningún registro.");
+                    File.Delete(tempPath);
+                }
+                
             }
             catch (Exception ex)
             {

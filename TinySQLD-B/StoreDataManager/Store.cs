@@ -144,11 +144,12 @@ namespace StoreDataManager
 
         public OperationStatus DropTable(string Table)
         {
-            if (CheckTables.CheckTB(SystemTablesFile, Table) == true)
+            //Verifica si la tabla existe
+            if (CheckAll.Check(SystemTablesFile, Table) == true)
             {
                 File.Delete(Table);
                 Console.WriteLine($"Se elimino {Table}");
-
+                //Llama la función para eliminar la tabla
                 CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
                 return OperationStatus.Success;
             }
