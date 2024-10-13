@@ -25,6 +25,16 @@
                 }
                 return errorint;
             }
+            if (CommandSentence.StartsWith("DROP TABLE", StringComparison.OrdinalIgnoreCase))
+            {
+                string[] parts = CommandSentence.Split(' ');
+                if (parts.Length >= 3)
+                {
+                    string NameDB = parts[2];
+                    return NameDB;
+                }
+                return errorint;
+            }
             else
             {
                 return "Error, no se especificaba a una Database";

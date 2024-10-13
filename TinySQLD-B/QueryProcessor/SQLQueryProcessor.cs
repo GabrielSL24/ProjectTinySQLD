@@ -41,8 +41,8 @@ namespace QueryProcessor
             else if (validator.IsDropTable(sentence))
             {
                 string tableName = extractor.ExtractTableName(sentence);
-                throw new NotImplementedException();
-                //return new DropTable().Execute(tableName);
+                //throw new NotImplementedException();
+                return new DropTable().Execute(tableName);
             }
             // Verificar si la sentencia corresponde a "INSERT INTO"
             else if (validator.IsInsertInto(sentence))

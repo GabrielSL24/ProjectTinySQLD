@@ -1,4 +1,5 @@
 ﻿using Entities;
+using StoreDataManager.Checks;
 
 namespace StoreDataManager
 {
@@ -51,11 +52,6 @@ namespace StoreDataManager
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
             using (BinaryWriter writer = new(stream))
             {
-
-
-                // Create an object with a hardcoded.
-                // First field is an int, second field is a string of size 30,
-                // third is a string of 50
                 idTB += 1;
                 foreach (var field in fields)
                 {
@@ -105,15 +101,7 @@ namespace StoreDataManager
                             throw new InvalidOperationException($"Tipo no soportado: {field.type}");
                     }
                 }
-
-                //string nombre = "Isaac".PadRight(30); // Pad to make the size of the string fixed
-                //string apellido = "Ramirez".PadRight(50);
-
-                //writer.Write(idTB);
-                //writer.Write(nombre);
-                //writer.Write(apellido);
             }
-            // Directory.CreateDirectory($@"{SystemTablesFile}\{NameTable}");s
             var TBpath = SystemTablesFile;
             using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
@@ -122,7 +110,7 @@ namespace StoreDataManager
                 string Table = NameTable.PadRight(15);
 
                 writer.Write(id);
-                writer.Write(Table);
+                writer.Write(Table.ToCharArray());
             }
             return OperationStatus.Success;
         }
@@ -132,21 +120,40 @@ namespace StoreDataManager
             NameDB = NameDATABASE;
             Directory.CreateDirectory($@"{DataPath}\{NameDATABASE}");
             var DBpath = SystemDatabasesFile;
+
+            
+
+
             using (FileStream stream = new FileStream(DBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
             {
-                idDB = +1;
+                idDB++;
                 string Database = NameDATABASE.PadRight(15);
 
                 writer.Write(idDB);
-                writer.Write(Database);
+                writer.Write(Database.ToCharArray());
             }
+            Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idTB}");
             return OperationStatus.Success;
         }
 
         public OperationStatus CreateColumn()
         {
             return OperationStatus.Success;
+        }
+
+        public OperationStatus DropTable(string Table)
+        {
+            //Verifica si la tabla existe
+            if (CheckAll.Check(SystemTablesFile, Table) == true)
+            {
+                File.Delete(Table);
+                Console.WriteLine($"Se elimino {Table}");
+                //Llama la función para eliminar la tabla
+                CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
+                return OperationStatus.Success;
+            }
+            return OperationStatus.Error;
         }
 
         public OperationStatus Select()
