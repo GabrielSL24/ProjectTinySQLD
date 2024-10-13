@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueryProcessor
+namespace QueryProcessor.Parser
 {
     public class StringList
     {
-        private string[] items;  
-        private int count;       
+        private string[] items;
+        private int count;
 
         public StringList()
         {
-            items = new string[10];  
+            items = new string[10];
             count = 0;
         }
 
@@ -22,7 +22,7 @@ namespace QueryProcessor
         {
             if (count == items.Length)
             {
-                Resize();  
+                Resize();
             }
             items[count] = item;
             count++;

@@ -1,4 +1,4 @@
-﻿using QueryProcessor;
+﻿using QueryProcessor.Parser;
 using System.Text.RegularExpressions;
 
 public class ExtractParameters
