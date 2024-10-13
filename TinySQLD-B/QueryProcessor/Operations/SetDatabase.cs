@@ -1,4 +1,5 @@
 ﻿using Entities;
+using StoreDataManager;
 
 namespace QueryProcessor.Operations
 {
@@ -10,7 +11,8 @@ namespace QueryProcessor.Operations
 
         internal OperationStatus Execute(string dbName)
         {
-            throw new NotImplementedException();
+            //Verifica que la DB exista, y si ese es el caso la setea, sino manda un warning
+            return Store.GetInstance().SetDataBase(dbName);
         }
     }
 }

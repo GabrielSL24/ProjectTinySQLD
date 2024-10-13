@@ -10,6 +10,7 @@ namespace StoreDataManager
         private static string NameDB;
         private static int idTB = 0;
         private static int idDB = 0;
+        private TableManager tableManager;
 
         public static Store GetInstance()
         {
@@ -33,7 +34,7 @@ namespace StoreDataManager
         public Store()
         {
             this.InitializeSystemCatalog();
-
+            tableManager = new TableManager(); // Inicializa el TableManager
         }
 
         private void InitializeSystemCatalog()
@@ -45,84 +46,14 @@ namespace StoreDataManager
 
         public OperationStatus CreateTable(string NameTable, params (object value, ColumnType type)[] fields)
         {
-
-            // Creates a default Table
-            var tablePath = $@"{DataPath}\{NameDB}\{NameTable}.Table";
-
-            using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
-            using (BinaryWriter writer = new(stream))
-            {
-                idTB += 1;
-                foreach (var field in fields)
-                {
-                    switch (field.type)
-                    {
-                        case ColumnType.Integer:
-                            if (field.value is int intvalue)
-                            {
-                                writer.Write(intvalue);
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("El valor no coincide con en tipo Integer");
-                            }
-                            break;
-                        case ColumnType.DateTime:
-                            if (field.value is DateTime dtvalue)
-                            {
-                                writer.Write(dtvalue.ToBinary());
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("El valor no coincide con el tipo DateTime.");
-                            }
-                            break;
-                        case ColumnType.Double:
-                            if (field.value is double doublevalue)
-                            {
-                                writer.Write(doublevalue);
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("El valor no coincide con el tipo Double.");
-                            }
-                            break;
-                        case ColumnType.Varchar:
-                            if (field.value is string strValue)
-                            {
-                                writer.Write(strValue.ToCharArray());
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("El valor no coincide con el tipo Varchar.");
-                            }
-                            break;
-                        default:
-                            throw new InvalidOperationException($"Tipo no soportado: {field.type}");
-                    }
-                }
-            }
-            var TBpath = SystemTablesFile;
-            using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
-            using (BinaryWriter writer = new(stream))
-            {
-                int id = idTB;
-                string Table = NameTable.PadRight(15);
-
-                writer.Write(id);
-                writer.Write(Table.ToCharArray());
-            }
-            return OperationStatus.Success;
+            return tableManager.CreateTable(NameDB, NameTable, fields); // Llama al método de TableManager
         }
+
 
         public OperationStatus CreateDataBase(string NameDATABASE)
         {
-            NameDB = NameDATABASE;
             Directory.CreateDirectory($@"{DataPath}\{NameDATABASE}");
             var DBpath = SystemDatabasesFile;
-
-            
-
 
             using (FileStream stream = new FileStream(DBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
@@ -170,5 +101,52 @@ namespace StoreDataManager
                 return OperationStatus.Success;
             }
         }
+
+        public OperationStatus SetDataBase(string NameDATABASE)
+        {
+            bool databaseExists = false;
+
+            try
+            {
+                using (FileStream stream = new FileStream(SystemDatabasesFile, FileMode.Open, FileAccess.Read))
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    long recordSize = sizeof(int) + 15 * sizeof(char); // ID + nombre de la base de datos
+
+                    while (stream.Position + recordSize <= stream.Length)
+                    {
+                        int id = reader.ReadInt32(); // Leer el ID de la base de datos
+                        string dbName = new string(reader.ReadChars(15)).Trim(); // Leer el nombre de la base de datos
+
+                        // Asegúrate de que la comparación no sea sensible a mayúsculas/minúsculas
+                        if (dbName.Equals(NameDATABASE, StringComparison.OrdinalIgnoreCase))
+                        {
+                            databaseExists = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (EndOfStreamException ex)
+            {
+                Console.WriteLine($"Error al leer el archivo: {ex.Message}");
+                return OperationStatus.Error;
+            }
+
+            if (databaseExists)
+            {
+                NameDB = NameDATABASE;
+                Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
+                return OperationStatus.Success;
+            }
+            else
+            {
+                Console.WriteLine($"La base de datos '{NameDATABASE}' no fue encontrada.");
+                return OperationStatus.Warning;
+            }
+        }
+
+
     }
+
 }
