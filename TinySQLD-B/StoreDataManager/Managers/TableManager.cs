@@ -10,7 +10,7 @@ namespace StoreDataManager
         private const string SystemTablesFile = @"C:\TinySql\Data\SystemCatalog\SystemTables.Table";
         private int idTB = 0;
 
-        public OperationStatus CreateTable(string nameDB, string nameTable, params (object value, ColumnType type)[] fields)
+        public OperationStatus CreateTable(string nameDB, int idDatabase, string nameTable, params (object value, ColumnType type)[] fields)
         {
             // Verifica si hay una base de datos establecida
             if (string.IsNullOrEmpty(nameDB))
@@ -20,7 +20,7 @@ namespace StoreDataManager
             }
 
             // Crea la ruta de la tabla dentro de la base de datos seleccionada
-            var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
+            //var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
 
             // Asegúrate de que la carpeta de la base de datos exista
             if (!Directory.Exists($@"{DataPath}\{nameDB}"))
@@ -28,6 +28,10 @@ namespace StoreDataManager
                 Console.WriteLine($"La base de datos '{nameDB}' no existe.");
                 return OperationStatus.Error;
             }
+
+            int idTable = GetNextTableID(nameDB);
+            var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
+
 
             using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
             using (BinaryWriter writer = new(stream))
@@ -40,7 +44,8 @@ namespace StoreDataManager
             }
 
             // Añadir la tabla al archivo de tablas
-            AddTableToSystem(nameTable);
+            AddTableToSystem(nameTable, idDatabase, idTable);
+            UpdateTableId(nameDB, idTable);
             Console.WriteLine($"Tabla '{nameTable}' creada en la base de datos '{nameDB}'.");
             return OperationStatus.Success;
         }
@@ -94,18 +99,37 @@ namespace StoreDataManager
             }
         }
 
-        private void AddTableToSystem(string nameTable)
+        private void AddTableToSystem(string nameTable, int IdDB, int idTB)
         {
             var TBpath = SystemTablesFile;
             using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
             {
-                int id = idTB;
+                int IdDatabase = IdDB;
+                int idTable = idTB;
                 string table = nameTable.PadRight(15);
 
-                writer.Write(id);
+                writer.Write(IdDatabase);
+                writer.Write(idTable);
                 writer.Write(table.ToCharArray());
             }
+        }
+
+        private int GetNextTableID(string nameDB)
+        {
+            var idFilePath = $@"{DataPath}\{nameDB}TableID.txt";
+            if (!File.Exists(idFilePath))
+            {
+                return 1;
+            }
+            var lastId = File.ReadAllText(idFilePath);
+            return int.Parse(lastId) + 1;
+        }
+
+        private void UpdateTableId(string nameDB, int newId)
+        {
+            var idFilePath = $@"{DataPath}\{nameDB}\TableID.txt";
+            File.WriteAllText(idFilePath, newId.ToString());
         }
     }
 }

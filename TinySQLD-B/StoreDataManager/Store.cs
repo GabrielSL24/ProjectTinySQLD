@@ -46,7 +46,7 @@ namespace StoreDataManager
 
         public OperationStatus CreateTable(string NameTable, params (object value, ColumnType type)[] fields)
         {
-            return tableManager.CreateTable(NameDB, NameTable, fields); // Llama al método de TableManager
+            return tableManager.CreateTable(NameDB, idDB, NameTable, fields); // Llama al método de TableManager
         }
 
 
@@ -64,7 +64,8 @@ namespace StoreDataManager
                 writer.Write(idDB);
                 writer.Write(Database.ToCharArray());
             }
-            Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idTB}");
+            Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idDB}");
+            NameDB = NameDATABASE;
             return OperationStatus.Success;
         }
 
@@ -75,16 +76,19 @@ namespace StoreDataManager
 
         public OperationStatus DropTable(string Table)
         {
-            //Verifica si la tabla existe
-            if (CheckAll.Check(SystemTablesFile, Table) == true)
-            {
-                File.Delete(Table);
-                Console.WriteLine($"Se elimino {Table}");
-                //Llama la función para eliminar la tabla
-                CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
-                return OperationStatus.Success;
-            }
-            return OperationStatus.Error;
+            ////Verifica si la tabla existe
+            //if (CheckAll.Check(SystemTablesFile, Table) == true)
+            //{
+            //    //File.Delete(Table);
+            //    //Console.WriteLine($"Se elimino {Table}");
+            //    //Llama la función para eliminar la tabla
+            //    CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
+            //    return OperationStatus.Success;
+            //}
+            CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
+            return OperationStatus.Success;
+
+            //return OperationStatus.Error;
         }
 
         public OperationStatus Select()
@@ -104,38 +108,8 @@ namespace StoreDataManager
 
         public OperationStatus SetDataBase(string NameDATABASE)
         {
-            bool databaseExists = false;
-
-            try
+            if (CheckAll.Check(SystemDatabasesFile, NameDATABASE))
             {
-                using (FileStream stream = new FileStream(SystemDatabasesFile, FileMode.Open, FileAccess.Read))
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    long recordSize = sizeof(int) + 15 * sizeof(char); // ID + nombre de la base de datos
-
-                    while (stream.Position + recordSize <= stream.Length)
-                    {
-                        int id = reader.ReadInt32(); // Leer el ID de la base de datos
-                        string dbName = new string(reader.ReadChars(15)).Trim(); // Leer el nombre de la base de datos
-
-                        // Asegúrate de que la comparación no sea sensible a mayúsculas/minúsculas
-                        if (dbName.Equals(NameDATABASE, StringComparison.OrdinalIgnoreCase))
-                        {
-                            databaseExists = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                Console.WriteLine($"Error al leer el archivo: {ex.Message}");
-                return OperationStatus.Error;
-            }
-
-            if (databaseExists)
-            {
-                NameDB = NameDATABASE;
                 Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
                 return OperationStatus.Success;
             }
@@ -144,6 +118,47 @@ namespace StoreDataManager
                 Console.WriteLine($"La base de datos '{NameDATABASE}' no fue encontrada.");
                 return OperationStatus.Warning;
             }
+
+            //bool databaseExists = false;
+
+            //try
+            //{
+            //    using (FileStream stream = new FileStream(SystemDatabasesFile, FileMode.Open, FileAccess.Read))
+            //    using (BinaryReader reader = new BinaryReader(stream))
+            //    {
+            //        long recordSize = sizeof(int) + 15 * sizeof(char); // ID + nombre de la base de datos
+
+            //        while (stream.Position + recordSize <= stream.Length)
+            //        {
+            //            int id = reader.ReadInt32(); // Leer el ID de la base de datos
+            //            string dbName = new string(reader.ReadChars(15)).Trim(); // Leer el nombre de la base de datos
+
+            //            // Asegúrate de que la comparación no sea sensible a mayúsculas/minúsculas
+            //            if (dbName.Equals(NameDATABASE, StringComparison.OrdinalIgnoreCase))
+            //            {
+            //                databaseExists = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
+            //catch (EndOfStreamException ex)
+            //{
+            //    Console.WriteLine($"Error al leer el archivo: {ex.Message}");
+            //    return OperationStatus.Error;
+            //}
+
+            //if (databaseExists)
+            //{
+            //    NameDB = NameDATABASE;
+            //    Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
+            //    return OperationStatus.Success;
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"La base de datos '{NameDATABASE}' no fue encontrada.");
+            //    return OperationStatus.Warning;
+            //}
         }
 
 
