@@ -9,6 +9,7 @@ namespace QueryProcessor
     {
         static private SQLValidator validator = new SQLValidator();
         static private ExtractParameters extractor = new ExtractParameters();
+        static private string setDB = null;
 
         public static OperationStatus Execute(string sentence)
         {
@@ -21,9 +22,8 @@ namespace QueryProcessor
             // Verificar si la sentencia corresponde a "SET DATABASE"
             else if (validator.IsSetDatabase(sentence))
             {
-                string dbName = extractor.ExtractDatabaseName(sentence);
-                throw new NotImplementedException();
-                //return new SetDatabase().Execute(dbName);
+                string dbName = extractor.ExtractDatabaseName(sentence); 
+                return new SetDatabase().Execute(dbName);
             }
             // Verificar si la sentencia corresponde a "CREATE TABLE"
             else if (validator.IsCreateTable(sentence))
@@ -41,8 +41,7 @@ namespace QueryProcessor
             else if (validator.IsDropTable(sentence))
             {
                 string tableName = extractor.ExtractTableName(sentence);
-                throw new NotImplementedException();
-                //return new DropTable().Execute(tableName);
+                return new DropTable().Execute(tableName);
             }
             // Verificar si la sentencia corresponde a "INSERT INTO"
             else if (validator.IsInsertInto(sentence))

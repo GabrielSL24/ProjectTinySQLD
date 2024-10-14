@@ -1,0 +1,14 @@
+0. Powershell 15pts..............................................................LISTO
+1. System Catalog 10pts..........................................................LISTO
+2. Create DATABASE 10pts.........................................................LISTO
+3. Hacer el SET DATABASE 5pts....................................................LISTO
+2. Implementar el CREATE TABLE como lo piden las identificaciones 10pts..........Se crea pero no esta completo 
+5. DROP TABLE 5pts...............................................................LISTO
+6. Crear el INDEX 10pts..........................................................FALTA
+7. Crear el SELECT 10pts.........................................................FALTA
+8. Crear el UPDATE 10pts.........................................................FALTA
+9. Implementar el DELETE 5pts....................................................FALTA
+10. Crear el INSERT  10pts.......................................................FALTA
+
+Total: 100
+Tenemos: 45 aprox
