@@ -1,1 +1,4 @@
-DROP TABLE Cuartos
+CREATE TABLE Estudiantes (ID INTEGER);
+CREATE DATABASE Universidad;
+SET DATABASE Universidad;
+CREATE TABLE Funcionarios (ID INTEGER);

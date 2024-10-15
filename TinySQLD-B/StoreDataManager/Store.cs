@@ -65,7 +65,7 @@ namespace StoreDataManager
                 writer.Write(Database.ToCharArray());
             }
             Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idDB}");
-            NameDB = NameDATABASE;
+            //NameDB = NameDATABASE;       //Esto ya no deberia de hacerse asi debido a que para eso esta el SET 
             return OperationStatus.Success;
         }
 
@@ -110,6 +110,7 @@ namespace StoreDataManager
         {
             if (CheckAll.Check(SystemDatabasesFile, NameDATABASE))
             {
+                NameDB = NameDATABASE;
                 Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
                 return OperationStatus.Success;
             }
