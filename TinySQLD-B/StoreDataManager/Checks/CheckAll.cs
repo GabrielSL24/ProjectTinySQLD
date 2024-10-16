@@ -8,6 +8,7 @@ namespace StoreDataManager.Checks
 {
     internal class CheckAll
     {
+        //Función para verificar si una Database existe.
         internal static bool Check(string path, string name)
         {
 
@@ -51,6 +52,33 @@ namespace StoreDataManager.Checks
                 }
             }
             return false;
+        }
+
+        //Función que retorna el ID de una tabla
+        internal static int CheckID(int IdDatabase, string path)
+        {
+            int BytesSize = 23;             //Tamaño del registro (ID database, ID table, Name table)
+            int currentID = 0;
+            int IDSize1 = 0;                //Posición inicial
+            int IDSize2 = 4;                //Longitud de bytes luego de leer el primer ID
+
+            using (FileStream stream = File.Open(path, FileMode .OpenOrCreate))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                while (stream.Position  < stream.Length)
+                {
+                    //RecordData es el registro en sí, y luego se guardan en variables desde las posiciones respectivas
+                    byte[] recordData = reader.ReadBytes(BytesSize);
+                    int IdDB = BitConverter.ToInt32(recordData, IDSize1);               //Desde la posición 0 lee 4 bytes
+                    int IdTable = BitConverter.ToInt32(recordData, IDSize2);            //Desde después de el primer ID lee el segundo
+
+                    if (IdDatabase == IdDB)
+                    {
+                        currentID = IdTable;
+                    }
+                }
+            }
+            return currentID;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Entities;
+using StoreDataManager.Checks;
 
 namespace StoreDataManager
 {
@@ -28,8 +29,9 @@ namespace StoreDataManager
                 Console.WriteLine($"La base de datos '{nameDB}' no existe.");
                 return OperationStatus.Error;
             }
-
-            int idTable = GetNextTableID(nameDB);
+            //Lláma a la función para que retorne el ID de la última tabla creada en su respectivo Database
+            int idTable = CheckAll.CheckID(idDatabase, SystemTablesFile);
+            idTable++;
             var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
 
 
@@ -45,8 +47,7 @@ namespace StoreDataManager
 
             // Añadir la tabla al archivo de tablas
             AddTableToSystem(nameTable, idDatabase, idTable);
-            UpdateTableId(nameDB, idTable);
-            Console.WriteLine($"Tabla '{nameTable}' creada en la base de datos '{nameDB}'.");
+            Console.WriteLine($"Tabla {nameTable}, con ID {idTable} creada en la base de datos '{nameDB}'.");
             return OperationStatus.Success;
         }
 
@@ -113,23 +114,6 @@ namespace StoreDataManager
                 writer.Write(idTable);
                 writer.Write(table.ToCharArray());
             }
-        }
-
-        private int GetNextTableID(string nameDB)
-        {
-            var idFilePath = $@"{DataPath}\{nameDB}TableID.txt";
-            if (!File.Exists(idFilePath))
-            {
-                return 1;
-            }
-            var lastId = File.ReadAllText(idFilePath);
-            return int.Parse(lastId) + 1;
-        }
-
-        private void UpdateTableId(string nameDB, int newId)
-        {
-            var idFilePath = $@"{DataPath}\{nameDB}\TableID.txt";
-            File.WriteAllText(idFilePath, newId.ToString());
         }
     }
 }

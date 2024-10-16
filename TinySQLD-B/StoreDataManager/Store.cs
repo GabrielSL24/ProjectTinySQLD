@@ -65,7 +65,7 @@ namespace StoreDataManager
                 writer.Write(Database.ToCharArray());
             }
             Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idDB}");
-            //NameDB = NameDATABASE;       //Esto ya no deberia de hacerse asi debido a que para eso esta el SET 
+            SetDataBase(NameDATABASE);
             return OperationStatus.Success;
         }
 
@@ -76,17 +76,15 @@ namespace StoreDataManager
 
         public OperationStatus DropTable(string Table)
         {
-            ////Verifica si la tabla existe
+            //Verifica si la tabla existe
             //if (CheckAll.Check(SystemTablesFile, Table) == true)
             //{
-            //    //File.Delete(Table);
-            //    //Console.WriteLine($"Se elimino {Table}");
             //    //Llama la función para eliminar la tabla
-            //    CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
-            //    return OperationStatus.Success;
-            //}
             CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
             return OperationStatus.Success;
+            //}
+            //CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
+            //return OperationStatus.Success;
 
             //return OperationStatus.Error;
         }
