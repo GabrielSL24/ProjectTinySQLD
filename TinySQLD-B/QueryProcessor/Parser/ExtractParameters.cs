@@ -29,7 +29,7 @@ public class ExtractParameters
         string columnDefinitions = match.Groups[2].Value;
 
         // Match para capturar columnas en formato multilinea
-        var columnMatches = Regex.Matches(columnDefinitions, @"(\w+)\s+(INTEGER|DOUBLE|VARCHAR\((\d+)\)|DATETIME)", RegexOptions.IgnoreCase);
+        var columnMatches = Regex.Matches(columnDefinitions, @"(\w+)\s+(INTEGER|DOUBLE|VARCHAR\((\d+)\)|VARCHAR|DATETIME)", RegexOptions.IgnoreCase);
 
         foreach (Match columnMatch in columnMatches)
         {

@@ -44,11 +44,14 @@ namespace StoreDataManager
             Directory.CreateDirectory(SystemCatalogPath);
         }
 
-        public OperationStatus CreateTable(string NameTable, params (object value, ColumnType type)[] fields)
+        public OperationStatus CreateTable(string NameTable, params (string columnName, ColumnType type, int? length)[] fields)
         {
-            return tableManager.CreateTable(NameDB, idDB, NameTable, fields); // Llama al método de TableManager
-        }
+            //Convierte lo recibido a una nueva variable que acepte el método CreateTable.
+            var transformedFields = fields.Select(field =>
+                (default(object), field.type, field.columnName, field.length ?? 0 )).ToArray();
 
+            return tableManager.CreateTable(NameDB, idDB, NameTable, transformedFields); // Llama al método de TableManager
+        }
 
         public OperationStatus CreateDataBase(string NameDATABASE)
         {
@@ -76,17 +79,10 @@ namespace StoreDataManager
 
         public OperationStatus DropTable(string Table)
         {
-            //Verifica si la tabla existe
-            //if (CheckAll.Check(SystemTablesFile, Table) == true)
-            //{
-            //    //Llama la función para eliminar la tabla
+
+            //Llama la función para eliminar la tabla
             CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
             return OperationStatus.Success;
-            //}
-            //CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
-            //return OperationStatus.Success;
-
-            //return OperationStatus.Error;
         }
 
         public OperationStatus Select()

@@ -29,7 +29,8 @@ namespace QueryProcessor
             else if (validator.IsCreateTable(sentence))
             {
                 var tableParams = extractor.ExtractCreateTableParameters(sentence);
-                return new CreateTable().Execute(tableParams);
+                List<(string columnName, ColumnType type, int? length)> columnInfo;
+                return new CreateTable().Execute(tableParams, out columnInfo);
             }
             // Verificar si la sentencia corresponde a "SELECT"
             else if (validator.IsSelect(sentence))
