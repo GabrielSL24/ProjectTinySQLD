@@ -20,7 +20,20 @@ namespace QueryProcessor.Operations
         //Convierte el tipo de columna de string ("integer", "varchar", etc...) al tipo de datos interno (ColumnRype)
         private (string columnName, ColumnType type, int? length) ConvertColumnType(string columnName, string columnType, int? length)
         {
-            //Devuelve tupla con el nombre de la columna, su tipo enumerado y, si aplica, su longitud
+            //Primero se verifica si el type es varchar
+            if (columnType.ToLower().StartsWith("varchar"))
+            {
+                if (length.HasValue)
+                {
+                    return (columnName, ColumnType.Varchar, length);
+                }
+                else
+                {
+                    throw new InvalidOperationException("El tipo VARCHAR requiere un valor de longitud");
+                }
+            }
+
+            //Devuelve tupla con el nombre de la columna y su tipo enumerado
             switch (columnType.ToLower())
             {
                 case "integer":
@@ -29,15 +42,6 @@ namespace QueryProcessor.Operations
                     return (columnName, ColumnType.DateTime, null);
                 case "double":
                     return (columnName, ColumnType.Double, null);
-                case "varchar":
-                    if (length.HasValue)
-                    {
-                        return (columnName, ColumnType.Varchar,length);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("eL TIPO VARCHAR requiere un valor de longitud");
-                    }
                 default:
                     throw new InvalidOperationException($"Tipo no soportado: {columnType}");
             }

@@ -1,8 +1,2 @@
-CREATE DATABASE Universidad;
-CREATE TABLE Estudiante (ID INTEGER);
-CREATE DATABASE Colegio;
-CREATE TABLE Funcionarios (ID INTEGER);
-CREATE DATABASE Casas;
-SET DATABASE Casas;
-CREATE TABLE Cuartos (ID INTEGER);
-CREATE TABLE Puertas (ID INTEGER);
+SET DATABASE Universidad;
+CREATE TABLE Estudiante ( ID INTEGER, Nombre VARCHAR(30), PrimerApellido VARCHAR(20), SegundoApellido VARCHAR(10), FechaNacimiento DATETIME );
