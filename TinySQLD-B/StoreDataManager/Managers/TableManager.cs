@@ -28,10 +28,10 @@ namespace StoreDataManager
             //Lláma a la función para que retorne el ID de la última tabla creada en su respectivo Database
             int idTable = CheckAll.CheckID(idDatabase, SystemTablesFile);
             idTable++;
-            var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
-
+            var databasePath = $@"{DataPath}\{nameDB}";
             // Añadir la tabla al archivo de tablas
             AddTableToSystem(nameTable, idDatabase, idTable);
+            AddTableInDatabase(databasePath, nameTable);
             Console.WriteLine($"Tabla {nameTable}, con ID {idTable} creada en la base de datos '{nameDB}'.");
 
             //Agrega la columna a SystemColumns con sus datos
@@ -71,6 +71,17 @@ namespace StoreDataManager
                 writer.Write(idTable);
                 writer.Write(table.ToCharArray());
             }
+        }
+
+        //Función para agregar una tabla a la base de datos correspondiente
+        private void AddTableInDatabase(string path, string tableName)
+        {
+            var tablePath = $@"{path}\{tableName}.TABLE";
+            using (FileStream stream = new FileStream(tablePath, FileMode.Create, FileAccess.Write))
+            {
+
+            }
+            
         }
     }
 }

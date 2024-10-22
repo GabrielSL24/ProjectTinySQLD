@@ -1,2 +1,2 @@
-SET DATABASE Universidad;
-CREATE TABLE Estudiante ( ID INTEGER, Nombre VARCHAR(30), PrimerApellido VARCHAR(20), SegundoApellido VARCHAR(10), FechaNacimiento DATETIME );
+
+INSERT INTO Personas VALUES( 10, "Gabriel", 18);

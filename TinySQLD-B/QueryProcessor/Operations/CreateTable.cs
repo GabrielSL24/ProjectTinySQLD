@@ -17,7 +17,7 @@ namespace QueryProcessor.Operations
 
             return Store.GetInstance().CreateTable(tableName, fields);
         }
-        //Convierte el tipo de columna de string ("integer", "varchar", etc...) al tipo de datos interno (ColumnRype)
+        //Convierte el tipo de columna de string ("integer", "varchar", etc...) al tipo de datos interno (ColumnType)
         private (string columnName, ColumnType type, int? length) ConvertColumnType(string columnName, string columnType, int? length)
         {
             //Primero se verifica si el type es varchar

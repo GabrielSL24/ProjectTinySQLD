@@ -47,9 +47,8 @@ namespace QueryProcessor
             // Verificar si la sentencia corresponde a "INSERT INTO"
             else if (validator.IsInsertInto(sentence))
             {
-                var insertParams = extractor.ExtractInsertParameters(sentence);
-                throw new NotImplementedException();
-                //return new InsertInto().Execute(insertParams);
+                var (tablename, values) = extractor.ExtractInsertParameters(sentence); 
+                return new Insert().Execute(tablename, values);
             }
             // Verificar si la sentencia corresponde a "UPDATE"
             else if (validator.IsUpdate(sentence))

@@ -100,6 +100,26 @@ namespace StoreDataManager
             }
         }
 
+        public OperationStatus InsertInto(string nameTable, List<(string value, string type)> values)
+        {
+            //Se consigue el ID de la tabla con el nombre
+            int idTable = Checks.CheckAll.CheckID(nameTable);
+            //Verifica si los valores mandados son correctos
+            if (CheckColumns.Check(idTable, values))
+            {
+                int idDatabase = CheckDatabases.CheckIdDatabase(nameTable, SystemTablesFile);
+                string nameDatabase = CheckDatabases.CheckNameDatabase(idDatabase, SystemDatabasesFile);
+
+                var DatabasePath = $@"{DataPath}\{nameDatabase}";
+                var TablePath = $@"{DatabasePath}\{nameTable}.TABLE";
+
+                //Se dirije a la tabla a agregar la información
+                CheckSystem.Database(TablePath, values);
+                return OperationStatus.Success;
+            }
+            return OperationStatus.Error;
+        }
+
         public OperationStatus SetDataBase(string NameDATABASE)
         {
             if (CheckAll.Check(SystemDatabasesFile, NameDATABASE))
