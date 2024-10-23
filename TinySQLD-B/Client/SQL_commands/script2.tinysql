@@ -2,3 +2,4 @@ CREATE TABLE Estudiantes (ID INTEGER);
 CREATE DATABASE Universidad;
 SET DATABASE Universidad;
 CREATE TABLE Funcionarios (ID INTEGER);
+INSERT INTO Funcionarios VALUES(10);
