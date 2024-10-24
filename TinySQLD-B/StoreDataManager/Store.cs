@@ -85,20 +85,106 @@ namespace StoreDataManager
             return OperationStatus.Success;
         }
 
-        public OperationStatus Select()
+        public OperationStatus Select(string nameTable)
         {
-            // Creates a default Table called ESTUDIANTES
-            var tablePath = $@"{DataPath}\Universidad\Funcionarios.Table";
-            using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
-            using (BinaryReader reader = new(stream))
+            try
             {
-                // Print the values as a I know exactly the types, but this needs to be done right11
-                Console.WriteLine(reader.ReadInt32());
-                Console.WriteLine(reader.ReadString());
-                Console.WriteLine(reader.ReadString());
+                // Conseguir el ID de la tabla
+                int idTable = Checks.CheckAll.CheckID(nameTable);
+
+                // Cargar los tipos de las columnas de la tabla
+                List<string> columnTypes = CheckColumns.LoadSystemColums(idTable);
+
+                // Obtener la ruta de la tabla
+                string databasePath = $@"{DataPath}\{NameDB}";
+                string tablePath = $@"{databasePath}\{nameTable}.Table";
+
+                // Abrir el archivo de la tabla
+                try
+                {
+                    using (FileStream stream = File.Open(tablePath, FileMode.Open, FileAccess.Read))
+                    using (BinaryReader reader = new(stream))
+                    {
+                        // Imprimir el esquema de la tabla (nombres y tipos de columnas)
+                        Console.WriteLine($"Mostrando los datos de la tabla: {nameTable}");
+                        Console.WriteLine($"Número de columnas: {columnTypes.Count}");
+                        Console.WriteLine($"Tipos de columnas: {string.Join(", ", columnTypes)}");
+
+                        // Leer los registros de la tabla
+                        while (stream.Position < stream.Length)
+                        {
+                            for (int i = 0; i < columnTypes.Count; i++)
+                            {
+                                string columnType = columnTypes[i];
+
+                                // Verificar si hay suficientes bytes antes de leer
+                                if (stream.Length - stream.Position < GetTypeSize(columnType))
+                                {
+                                    Console.WriteLine("Error: El archivo no contiene suficientes datos para coincidir con el esquema.");
+                                    return OperationStatus.Error;
+                                }
+
+                                switch (columnType.ToUpper())
+                                {
+                                    case "INTEGER":
+                                        Console.Write(reader.ReadInt32() + " ");
+                                        break;
+                                    case "DOUBLE":
+                                        Console.Write(reader.ReadDouble() + " ");
+                                        break;
+                                    case "VARCHAR":
+                                        Console.Write(reader.ReadString() + " ");
+                                        break;
+                                    case "DATETIME":
+                                        Console.Write(DateTime.FromBinary(reader.ReadInt64()) + " ");
+                                        break;
+                                    default:
+                                        Console.WriteLine($"Tipo de columna desconocido: {columnType}");
+                                        break;
+                                }
+                            }
+                            Console.WriteLine(); // Separador entre filas
+                        }
+                    }
+                }
+                catch (FileNotFoundException ex)
+                {
+                    Console.WriteLine($"Error al leer la tabla {nameTable}: {ex.Message}");
+                    return OperationStatus.Error;
+                }
+                catch (EndOfStreamException ex)
+                {
+                    Console.WriteLine($"Error: Se intentó leer más allá del final del archivo {nameTable}. {ex.Message}");
+                    return OperationStatus.Error;
+                }
+
                 return OperationStatus.Success;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error inesperado al procesar la tabla {nameTable}: {ex.Message}");
+                return OperationStatus.Error;
+            }
         }
+
+        // Método auxiliar para obtener el tamaño esperado de cada tipo de columna
+        private static int GetTypeSize(string columnType)
+        {
+            switch (columnType.ToUpper())
+            {
+                case "INTEGER":
+                    return sizeof(int); // Tamaño de un entero (4 bytes)
+                case "DOUBLE":
+                    return sizeof(double); // Tamaño de un double (8 bytes)
+                case "VARCHAR":
+                    return 50; // Asume un tamaño máximo de 50 caracteres para VARCHAR
+                case "DATETIME":
+                    return sizeof(long); // Tamaño de un DateTime almacenado como long (8 bytes)
+                default:
+                    throw new Exception($"Tipo de columna desconocido: {columnType}");
+            }
+        }
+
 
         public OperationStatus InsertInto(string nameTable, List<(string value, string type)> values)
         {

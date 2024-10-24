@@ -3,3 +3,7 @@ CREATE DATABASE Universidad;
 SET DATABASE Universidad;
 CREATE TABLE Funcionarios (ID INTEGER);
 INSERT INTO Funcionarios VALUES(10);
+INSERT INTO Funcionarios VALUES(20);
+INSERT INTO Funcionarios VALUES(30);
+INSERT INTO Funcionarios VALUES(40);
+SELECT * FROM Funcionarios;

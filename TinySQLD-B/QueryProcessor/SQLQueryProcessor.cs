@@ -36,7 +36,8 @@ namespace QueryProcessor
             else if (validator.IsSelect(sentence))
             {
                 var selectParams = extractor.ExtractSelectParameters(sentence);
-                return new Select().Execute();
+                var (column, tableName, whereClause, orderBy) = selectParams;
+                return new Select().Execute(tableName);
             }
             // Verificar si la sentencia corresponde a "DROP TABLE"
             else if (validator.IsDropTable(sentence))
