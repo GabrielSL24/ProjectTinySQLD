@@ -29,7 +29,8 @@ namespace QueryProcessor
             else if (validator.IsCreateTable(sentence))
             {
                 var tableParams = extractor.ExtractCreateTableParameters(sentence);
-                return new CreateTable().Execute(tableParams);
+                List<(string columnName, ColumnType type, int? length)> columnInfo;
+                return new CreateTable().Execute(tableParams, out columnInfo);
             }
             // Verificar si la sentencia corresponde a "SELECT"
             else if (validator.IsSelect(sentence))
@@ -46,9 +47,8 @@ namespace QueryProcessor
             // Verificar si la sentencia corresponde a "INSERT INTO"
             else if (validator.IsInsertInto(sentence))
             {
-                var insertParams = extractor.ExtractInsertParameters(sentence);
-                throw new NotImplementedException();
-                //return new InsertInto().Execute(insertParams);
+                var (tablename, values) = extractor.ExtractInsertParameters(sentence); 
+                return new Insert().Execute(tablename, values);
             }
             // Verificar si la sentencia corresponde a "UPDATE"
             else if (validator.IsUpdate(sentence))

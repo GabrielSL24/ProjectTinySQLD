@@ -15,10 +15,10 @@ namespace StoreDataManager.Checks
         internal static void RemoveTable(string pathDB,string path, string TableName)
         {
             //Define los tamaños y posiciones para los datos del archivo binario
-            int sizeB = 19;                 //tamaño
-            int idOffset = 0;               //Posición actual
-            int idLength = 4;               //Longitud de ID (bytes)
-            int nameOffset = 4;             //Posición inicial del nombre
+            int sizeB = 23;                 //tamaño
+            int idDtabaseOffset = 0;               //Posición actual
+            int idTableOffset = 4;               //Longitud de ID (bytes)
+            int nameOffset = 8;             //Posición inicial del nombre
             int nameLength = 15;            //Longitud del nombre (bytes)
             bool recordDelete = false;      
             string tempPath = Path.GetTempFileName();   //Crea un archivo temporal
@@ -39,8 +39,9 @@ namespace StoreDataManager.Checks
                         //Verifica si el tamaño del registro leído es suficiente para contener ID y nombre
                         if (recordData.Length >= nameOffset + nameLength)           
                         {
-                            int id = BitConverter.ToInt32(recordData, idOffset);
-                            Console.WriteLine($"ID convertido: {id}");
+                            int idDatabase = BitConverter.ToInt32(recordData, idDtabaseOffset);
+                            int idTable = BitConverter.ToInt32(recordData, idTableOffset);
+                            Console.WriteLine($"ID de la base de datos: {idDatabase}, ID de la tabla: {idTable}");
 
                             //Extrae el nombre del resgistro (15 bytes desde la posición 4)
                             string recordString = Encoding.ASCII.GetString(recordData, nameOffset, nameLength).Trim();  
@@ -55,8 +56,8 @@ namespace StoreDataManager.Checks
                             {
                                 //Si coinciden los nombres, se intenta eliminar el registro
                                 Console.WriteLine($"Registro {TableName} encontrando en posición {recordPosition} y será eliminado");
-                                Console.WriteLine($"El id es: {id}");
-                                if (CheckDatabases.RemoveDatabases(pathDB, id, TableName))
+                                Console.WriteLine($"ID de la base de datos: {idDatabase},, ID de a tabla: {idTable}");
+                                if (CheckDatabases.RemoveDatabases(pathDB, idDatabase, TableName))
                                 {
                                     recordDelete = true;
                                 }

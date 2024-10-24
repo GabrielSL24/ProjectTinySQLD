@@ -1,6 +1,2 @@
-CREATE DATABASE Universidad
-CREATE TABLE Funcionarios (ID INTEGER)
-CREATE DATABASE Colegio
-CREATE TABLE Estudiantes (ID INTEGER)
 
-DROP TABLE Estudiantes
+INSERT INTO Personas VALUES( 10, "Gabriel", 18);

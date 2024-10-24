@@ -44,11 +44,14 @@ namespace StoreDataManager
             Directory.CreateDirectory(SystemCatalogPath);
         }
 
-        public OperationStatus CreateTable(string NameTable, params (object value, ColumnType type)[] fields)
+        public OperationStatus CreateTable(string NameTable, params (string columnName, ColumnType type, int? length)[] fields)
         {
-            return tableManager.CreateTable(NameDB, NameTable, fields); // Llama al método de TableManager
-        }
+            //Convierte lo recibido a una nueva variable que acepte el método CreateTable.
+            var transformedFields = fields.Select(field =>
+                (default(object), field.type, field.columnName, field.length ?? 0 )).ToArray();
 
+            return tableManager.CreateTable(NameDB, idDB, NameTable, transformedFields); // Llama al método de TableManager
+        }
 
         public OperationStatus CreateDataBase(string NameDATABASE)
         {
@@ -64,7 +67,8 @@ namespace StoreDataManager
                 writer.Write(idDB);
                 writer.Write(Database.ToCharArray());
             }
-            Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idTB}");
+            Console.WriteLine($"Base de datos {NameDATABASE} creada con ID: {idDB}");
+            SetDataBase(NameDATABASE);
             return OperationStatus.Success;
         }
 
@@ -75,16 +79,10 @@ namespace StoreDataManager
 
         public OperationStatus DropTable(string Table)
         {
-            //Verifica si la tabla existe
-            if (CheckAll.Check(SystemTablesFile, Table) == true)
-            {
-                File.Delete(Table);
-                Console.WriteLine($"Se elimino {Table}");
-                //Llama la función para eliminar la tabla
-                CheckTables.RemoveTable(SystemDatabasesFile ,SystemTablesFile, Table);
-                return OperationStatus.Success;
-            }
-            return OperationStatus.Error;
+
+            //Llama la función para eliminar la tabla
+            CheckTables.RemoveTable(SystemDatabasesFile, SystemTablesFile, Table);
+            return OperationStatus.Success;
         }
 
         public OperationStatus Select()
@@ -102,38 +100,29 @@ namespace StoreDataManager
             }
         }
 
+        public OperationStatus InsertInto(string nameTable, List<(string value, string type)> values)
+        {
+            //Se consigue el ID de la tabla con el nombre
+            int idTable = Checks.CheckAll.CheckID(nameTable);
+            //Verifica si los valores mandados son correctos
+            if (CheckColumns.Check(idTable, values))
+            {
+                int idDatabase = CheckDatabases.CheckIdDatabase(nameTable, SystemTablesFile);
+                string nameDatabase = CheckDatabases.CheckNameDatabase(idDatabase, SystemDatabasesFile);
+
+                var DatabasePath = $@"{DataPath}\{nameDatabase}";
+                var TablePath = $@"{DatabasePath}\{nameTable}.TABLE";
+
+                //Se dirije a la tabla a agregar la información
+                CheckSystem.Database(TablePath, values);
+                return OperationStatus.Success;
+            }
+            return OperationStatus.Error;
+        }
+
         public OperationStatus SetDataBase(string NameDATABASE)
         {
-            bool databaseExists = false;
-
-            try
-            {
-                using (FileStream stream = new FileStream(SystemDatabasesFile, FileMode.Open, FileAccess.Read))
-                using (BinaryReader reader = new BinaryReader(stream))
-                {
-                    long recordSize = sizeof(int) + 15 * sizeof(char); // ID + nombre de la base de datos
-
-                    while (stream.Position + recordSize <= stream.Length)
-                    {
-                        int id = reader.ReadInt32(); // Leer el ID de la base de datos
-                        string dbName = new string(reader.ReadChars(15)).Trim(); // Leer el nombre de la base de datos
-
-                        // Asegúrate de que la comparación no sea sensible a mayúsculas/minúsculas
-                        if (dbName.Equals(NameDATABASE, StringComparison.OrdinalIgnoreCase))
-                        {
-                            databaseExists = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                Console.WriteLine($"Error al leer el archivo: {ex.Message}");
-                return OperationStatus.Error;
-            }
-
-            if (databaseExists)
+            if (CheckAll.Check(SystemDatabasesFile, NameDATABASE))
             {
                 NameDB = NameDATABASE;
                 Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
@@ -144,6 +133,47 @@ namespace StoreDataManager
                 Console.WriteLine($"La base de datos '{NameDATABASE}' no fue encontrada.");
                 return OperationStatus.Warning;
             }
+
+            //bool databaseExists = false;
+
+            //try
+            //{
+            //    using (FileStream stream = new FileStream(SystemDatabasesFile, FileMode.Open, FileAccess.Read))
+            //    using (BinaryReader reader = new BinaryReader(stream))
+            //    {
+            //        long recordSize = sizeof(int) + 15 * sizeof(char); // ID + nombre de la base de datos
+
+            //        while (stream.Position + recordSize <= stream.Length)
+            //        {
+            //            int id = reader.ReadInt32(); // Leer el ID de la base de datos
+            //            string dbName = new string(reader.ReadChars(15)).Trim(); // Leer el nombre de la base de datos
+
+            //            // Asegúrate de que la comparación no sea sensible a mayúsculas/minúsculas
+            //            if (dbName.Equals(NameDATABASE, StringComparison.OrdinalIgnoreCase))
+            //            {
+            //                databaseExists = true;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
+            //catch (EndOfStreamException ex)
+            //{
+            //    Console.WriteLine($"Error al leer el archivo: {ex.Message}");
+            //    return OperationStatus.Error;
+            //}
+
+            //if (databaseExists)
+            //{
+            //    NameDB = NameDATABASE;
+            //    Console.WriteLine($"Base de datos '{NameDATABASE}' seleccionada.");
+            //    return OperationStatus.Success;
+            //}
+            //else
+            //{
+            //    Console.WriteLine($"La base de datos '{NameDATABASE}' no fue encontrada.");
+            //    return OperationStatus.Warning;
+            //}
         }
 
 

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.IO;
 using Entities;
+using StoreDataManager.Checks;
 
 namespace StoreDataManager
 {
     public class TableManager
     {
         private const string DataPath = @"C:\TinySql\Data";
-        private const string SystemTablesFile = @"C:\TinySql\Data\SystemCatalog\SystemTables.Table";
-        private int idTB = 0;
+        private const string SystemTablesFile = $@"{DataPath}\SystemCatalog\SystemTables.Table";
+        private const string SystemColumnsFile = $@"{DataPath}\SystemCatalog\SystemColumns.Table";
 
-        public OperationStatus CreateTable(string nameDB, string nameTable, params (object value, ColumnType type)[] fields)
+        public OperationStatus CreateTable(string nameDB, int idDatabase, string nameTable, params (object value, ColumnType type, string columnName, int extra)[] fields)
         {
             // Verifica si hay una base de datos establecida
             if (string.IsNullOrEmpty(nameDB))
@@ -18,94 +19,69 @@ namespace StoreDataManager
                 Console.WriteLine("No hay ninguna base de datos seleccionada.");
                 return OperationStatus.Error;
             }
-
-            // Crea la ruta de la tabla dentro de la base de datos seleccionada
-            var tablePath = $@"{DataPath}\{nameDB}\{nameTable}.Table";
-
             // Asegúrate de que la carpeta de la base de datos exista
             if (!Directory.Exists($@"{DataPath}\{nameDB}"))
             {
                 Console.WriteLine($"La base de datos '{nameDB}' no existe.");
                 return OperationStatus.Error;
             }
+            //Lláma a la función para que retorne el ID de la última tabla creada en su respectivo Database
+            int idTable = CheckAll.CheckID(idDatabase, SystemTablesFile);
+            idTable++;
+            var databasePath = $@"{DataPath}\{nameDB}";
+            // Añadir la tabla al archivo de tablas
+            AddTableToSystem(nameTable, idDatabase, idTable);
+            AddTableInDatabase(databasePath, nameTable);
+            Console.WriteLine($"Tabla {nameTable}, con ID {idTable} creada en la base de datos '{nameDB}'.");
 
-            using (FileStream stream = File.Open(tablePath, FileMode.OpenOrCreate))
+            //Agrega la columna a SystemColumns con sus datos
+            using (FileStream stream = File.Open(SystemColumnsFile, FileMode.Append))
             using (BinaryWriter writer = new(stream))
             {
-                idTB += 1;
                 foreach (var field in fields)
                 {
-                    WriteField(writer, field);
+                    WriteField(idTable, writer, field);
                 }
             }
-
-            // Añadir la tabla al archivo de tablas
-            AddTableToSystem(nameTable);
-            Console.WriteLine($"Tabla '{nameTable}' creada en la base de datos '{nameDB}'.");
             return OperationStatus.Success;
         }
-
-        private void WriteField(BinaryWriter writer, (object value, ColumnType type) field)
+        //Método para escribir en SystemColumns el registro de la columna.
+        private void WriteField(int idTB,BinaryWriter writer, (object value, ColumnType type, string columnName, int extra) field)
         {
-            switch (field.type)
-            {
-                case ColumnType.Integer:
-                    if (field.value is int intValue)
-                    {
-                        writer.Write(intValue);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("El valor no coincide con el tipo Integer");
-                    }
-                    break;
-                case ColumnType.DateTime:
-                    if (field.value is DateTime dtValue)
-                    {
-                        writer.Write(dtValue.ToBinary());
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("El valor no coincide con el tipo DateTime.");
-                    }
-                    break;
-                case ColumnType.Double:
-                    if (field.value is double doubleValue)
-                    {
-                        writer.Write(doubleValue);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("El valor no coincide con el tipo Double.");
-                    }
-                    break;
-                case ColumnType.Varchar:
-                    if (field.value is string strValue)
-                    {
-                        writer.Write(strValue.ToCharArray());
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("El valor no coincide con el tipo Varchar.");
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException($"Tipo no soportado: {field.type}");
-            }
+            string columnName = field.columnName.PadRight(15);
+            string type = field.type.ToString();
+            
+            writer.Write(idTB);
+            writer.Write(columnName.ToCharArray());
+            writer.Write(type.PadRight(10).ToCharArray());
+            writer.Write(field.extra);
         }
-
-        private void AddTableToSystem(string nameTable)
+        //Método para agregar una tabla en SystemTablesFile
+        private void AddTableToSystem(string nameTable, int IdDB, int idTB)
         {
             var TBpath = SystemTablesFile;
             using (FileStream stream = new FileStream(TBpath, FileMode.Append, FileAccess.Write))
             using (BinaryWriter writer = new(stream))
             {
-                int id = idTB;
+                int IdDatabase = IdDB;
+                int idTable = idTB;
                 string table = nameTable.PadRight(15);
 
-                writer.Write(id);
+                writer.Write(IdDatabase);
+                writer.Write(idTable);
                 writer.Write(table.ToCharArray());
             }
+        }
+
+        //Función para agregar una tabla a la base de datos correspondiente
+        private void AddTableInDatabase(string path, string tableName)
+        {
+            var tablePath = $@"{path}\{tableName}.TABLE";
+            using (FileStream stream = new FileStream(tablePath, FileMode.Create, FileAccess.Write))
+            {
+
+            }
+            
         }
     }
 }

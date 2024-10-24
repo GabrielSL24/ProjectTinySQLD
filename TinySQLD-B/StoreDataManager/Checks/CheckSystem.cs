@@ -48,5 +48,19 @@ namespace StoreDataManager.Checks
             return false;
             
         }
+
+        //Función para escribir los valores en la tabla de la base de datos
+        internal static bool Database(string path, List<(string value, string type)> values)
+        {
+            using (FileStream stream = File.Open(path, FileMode.Append))
+            using (BinaryWriter writer = new(stream))
+            {
+                for (int i = 0; i < values.Count; i++)
+                {
+                    writer.Write(values[i].value);
+                }
+                return true;
+            }
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using QueryProcessor.Parser;
+﻿using QueryProcessor.Operations;
+using QueryProcessor.Parser;
+using StoreDataManager.Checks;
 using System.Text.RegularExpressions;
 
 public class ExtractParameters
@@ -90,9 +92,9 @@ public class ExtractParameters
     }
 
     // Extraer parámetros para INSERT INTO
-    public (string tableName, StringList values) ExtractInsertParameters(string sentence)
+    public (string tableName, List<(string value, string type)> values) ExtractInsertParameters(string sentence)
     {
-        var match = Regex.Match(sentence, @"INSERT\s+INTO\s+(\w+)\s+\((.+)\)", RegexOptions.IgnoreCase);
+        var match = Regex.Match(sentence, @"INSERT\s+INTO\s+(\w+)\s+VALUES\s*\((.+)\)", RegexOptions.IgnoreCase);
 
         if (!match.Success)
         {
@@ -100,15 +102,16 @@ public class ExtractParameters
         }
 
         string tableName = match.Groups[1].Value;
-        StringList values = new StringList();
+        List<(string value, string type)> values = new List<(string value, string type)>();
 
         // Separar los valores por comas y agregarlos a nuestra estructura personalizada
         string[] splitValues = match.Groups[2].Value.Split(',');
         foreach (string value in splitValues)
         {
-            values.Add(value.Trim());  // Agregamos cada valor, eliminando espacios
+            string ValueDatos = value.Trim();
+            string type = Insert.DetectType(ValueDatos);
+            values.Add((ValueDatos, type));  // Agregamos cada valor, eliminando espacios
         }
-
         return (tableName, values);
     }
 
